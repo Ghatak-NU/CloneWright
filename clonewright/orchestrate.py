@@ -49,6 +49,9 @@ class Request:
     """
 
     insert: str
+    # What to call the gene, when `insert` is a pasted sequence rather than
+    # a file with a name in it. Empty leaves whatever the loader found.
+    insert_name: str = ""
     # Empty means "choose one", which is answered by designing into every
     # bundled vector rather than by preference.
     vector: str = ""
@@ -212,7 +215,15 @@ class Orchestrator:
         request = self.planner.route(request)
         out = Outcome(request=request, trace=s.trace)
 
-        insert = s.call("seqio.load", path=request.insert)
+        # `load_sequence` rather than `load`, because a gene does not
+        # always arrive as a file: the interactive session lets you paste
+        # the sequence, and a path-only loader refused it.
+        insert = s.call("seqio.load_sequence", value=request.insert)
+        if request.insert_name:
+            # A pasted sequence has no name of its own, and the name ends
+            # up on the primers -- `<literal>_F` is not something to put
+            # on an order form.
+            insert.name = request.insert_name
         opts = design_mod.Options(mode=request.mode)
 
         name = request.vector

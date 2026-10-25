@@ -1,6 +1,6 @@
 # clonewright 0.1.0 -- worked example
 #
-#   python -m clonewright design examples/SOD1.fasta --vector pET-28a --origin human
+#   clonewright design examples/SOD1.fasta --vector pET-28a --origin human
 #
 # Kept in the repository on purpose: it records what the tool produced at
 # a given commit, which is the provenance trail that makes a design

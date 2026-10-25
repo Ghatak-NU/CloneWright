@@ -33,6 +33,7 @@ from clonewright import construct  # noqa: E402
 from clonewright import design as dz  # noqa: E402
 from clonewright import enzymes as ez  # noqa: E402
 from clonewright import expression  # noqa: E402
+from clonewright import interactive  # noqa: E402
 from clonewright import orchestrate  # noqa: E402
 from clonewright import planner  # noqa: E402
 from clonewright import report  # noqa: E402
@@ -1091,10 +1092,31 @@ def run_cli(*argv) -> tuple[int, str, str]:
 
 
 class TestCLI(unittest.TestCase):
-    def test_no_command_prints_help(self):
-        code, text, _ = run_cli()
+    def test_no_command_with_no_terminal_prints_help(self):
+        """In a pipe or a CI step there is nobody to interview, and a
+        blocking prompt there is worse than help text."""
+        original = cli.interactive.available
+        cli.interactive.available = lambda: False
+        try:
+            code, text, _ = run_cli()
+        finally:
+            cli.interactive.available = original
         self.assertEqual(code, 2)
         self.assertIn("clonewright", text)
+
+    def test_no_command_with_a_terminal_starts_the_interview(self):
+        original_available = cli.interactive.available
+        original_run = cli.interactive.run
+        started: list[bool] = []
+        cli.interactive.available = lambda: True
+        cli.interactive.run = lambda *a, **k: (started.append(True), 0)[1]
+        try:
+            code, _, _ = run_cli()
+        finally:
+            cli.interactive.available = original_available
+            cli.interactive.run = original_run
+        self.assertEqual(code, 0)
+        self.assertTrue(started)
 
     def test_design_exits_zero_on_success(self):
         code, text, _ = run_cli(
@@ -1183,6 +1205,139 @@ class TestCLI(unittest.TestCase):
         names = [f.name for f in derived.features]
         self.assertIn("RBS", names)
         self.assertIn("T7 promoter", names)
+
+
+# ---------------------------------------------------------------------------
+# the interactive session
+# ---------------------------------------------------------------------------
+
+
+SOD1 = str(EXAMPLES / "SOD1.fasta")
+
+
+class TestInteractive(unittest.TestCase):
+    """Driven from a list of answers, which is the only way an interactive
+    program gets tested: `Console` injects input and output rather than
+    calling them."""
+
+    def session(self, answers: list[str]) -> tuple[int, str]:
+        console, printed = interactive.Console.scripted(answers)
+        code = interactive.run(console)
+        return code, "\n".join(printed)
+
+    def test_the_shortest_complete_session(self):
+        code, text = self.session([SOD1, "1", "", "n", "n"])
+        self.assertEqual(code, 0)
+        self.assertIn("NdeI", text)
+        self.assertIn("pET-28a", text)
+
+    def test_defaults_alone_produce_a_design(self):
+        """Enter at every question has to work, or the defaults are a lie."""
+        code, text = self.session([SOD1, "", "", "", "n"])
+        self.assertEqual(code, 0)
+        self.assertIn("ranked by designing into each one", text)
+
+    def test_it_says_what_it_read(self):
+        _code, text = self.session([SOD1, "1", "", "n", "n"])
+        self.assertIn("read SOD1, 465 bp", text)
+        self.assertIn("reads cleanly from a start codon", text)
+
+    def test_a_bad_path_is_re_asked_not_fatal(self):
+        code, text = self.session(["no-such-gene.fa", SOD1, "1", "", "n", "n"])
+        self.assertEqual(code, 0)
+        self.assertIn("no such file", text)
+        self.assertIn("read SOD1", text)
+
+    def test_a_pasted_sequence_works_and_can_be_named(self):
+        sequence = gene("SOD1").seq
+        code, text = self.session([sequence, "MyGene", "1", "", "n", "n"])
+        self.assertEqual(code, 0)
+        self.assertIn("MyGene_F", text)
+        self.assertNotIn("<literal>_F", text)
+
+    def test_a_number_outside_the_menu_is_re_asked(self):
+        code, text = self.session([SOD1, "17", "2", "", "n", "n"])
+        self.assertEqual(code, 0)
+        self.assertIn("pick a number between 1 and", text)
+        self.assertIn("pET-21b", text)
+
+    def test_an_unknown_organism_is_re_asked(self):
+        code, text = self.session([SOD1, "1", "tardigrade", "yeast", "n", "n"])
+        self.assertEqual(code, 0)
+        self.assertIn("unknown source organism", text)
+        self.assertIn("yeast or other fungus", text)
+
+    def test_a_vector_of_your_own_is_accepted_by_path(self):
+        code, text = self.session([
+            SOD1, "6", str(MAPS / "pGEX-4T-1.gb"), "", "n", "n",
+        ])
+        self.assertEqual(code, 0)
+        self.assertIn("pGEX-4T-1", text)
+
+    def test_a_bad_vector_path_is_re_asked(self):
+        code, text = self.session([
+            SOD1, "6", "nowhere.gb", str(MAPS / "pET-28a.gb"),
+            "", "n", "n",
+        ])
+        self.assertEqual(code, 0)
+        self.assertIn("neither a file nor a vector", text)
+
+    def test_a_yes_or_no_question_rejects_anything_else(self):
+        code, text = self.session([SOD1, "1", "", "maybe", "n", "n"])
+        self.assertEqual(code, 0)
+        self.assertIn("please answer y or n", text)
+
+    def test_verification_can_be_declined(self):
+        _code, with_it = self.session([SOD1, "1", "", "y", "n"])
+        _code, without = self.session([SOD1, "1", "", "n", "n"])
+        self.assertIn("colony PCR screen", with_it)
+        self.assertNotIn("colony PCR screen", without)
+
+    def test_running_out_of_answers_stops_cleanly(self):
+        code, text = self.session([SOD1])
+        self.assertEqual(code, 130)
+        self.assertIn("stopped.", text)
+
+    def test_it_can_write_the_construct(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp) / "built.gb"
+            code, text = self.session([
+                SOD1, "1", "", "n", "y", str(out),
+            ])
+            self.assertEqual(code, 0)
+            self.assertIn("written:", text)
+            record = seqio.load(out)
+        self.assertTrue(record.circular)
+        self.assertIn("SOD1", [f.name for f in record.features])
+
+    def test_a_refused_design_exits_one_and_says_it_is_a_refusal(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "mammalian.gb"
+            record = seqio.Record(
+                "pCMV-ish", "ATGC" * 1200, True,
+                [seqio.Feature("CMV promoter", "promoter", 10, 30, True)],
+            )
+            path.write_text(seqio.write_genbank(record), encoding="utf-8")
+            code, text = self.session([SOD1, "6", str(path), "", "n"])
+        self.assertEqual(code, 1)
+        self.assertIn("mammalian", text)
+        self.assertIn("refusal, not a crash", text)
+
+    def test_the_interactive_subcommand_runs_the_same_thing(self):
+        original = cli.interactive.run
+        seen: list[object] = []
+        cli.interactive.run = lambda *a, **k: (seen.append(True), 0)[1]
+        try:
+            code, _, _ = run_cli("interactive")
+        finally:
+            cli.interactive.run = original
+        self.assertEqual(code, 0)
+        self.assertTrue(seen)
+
+    def test_every_catalog_vector_offers_a_short_summary_for_the_menu(self):
+        for name in vectors.available():
+            self.assertTrue(vectors.CATALOG[name].summary, name)
+            self.assertLess(len(vectors.CATALOG[name].summary), 50, name)
 
 
 if __name__ == "__main__":

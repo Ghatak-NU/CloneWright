@@ -13,7 +13,15 @@ Pure Python 3, standard library only. No conda environment, no BLAST
 install, no network.
 
 ```bash
-python -m clonewright design examples/SOD1.fasta --vector pET-28a
+pip install git+https://github.com/Ghatak-NU/clonewright
+clonewright
+```
+
+With no arguments it asks for what it needs — the gene, the vector, where
+the gene came from — and prints the report. If you would rather pass flags:
+
+```bash
+clonewright design SOD1.fasta --vector pET-28a --origin human
 ```
 
 ---
@@ -44,6 +52,68 @@ Every one of those is checked here, and each is reported as a note, a
 warning or a refusal.
 
 ---
+
+## The session
+
+```
+$ clonewright
+
+clonewright 0.1.0
+restriction-cloning primers for expression in E. coli
+
+Which gene are you cloning?
+a file path (FASTA, GenBank, SnapGene .dna), or paste the sequence
+> examples/SOD1.fasta
+  read SOD1, 465 bp, ATG...TAA
+  it reads cleanly from a start codon to a stop, in frame.
+
+Which vector?
+  1  pET-28a(+)   T7/lac  kanamycin   N-terminal 6xHis, cleavable
+  2  pET-21b(+)   T7/lac  ampicillin  untagged, unless you take the C-terminal 6xHis
+  3  pGEX-4T-1    tac     ampicillin  N-terminal GST, 26 kDa, cleavable
+  4  pMAL-c5X     tac     ampicillin  N-terminal MBP, 42 kDa, cleavable
+  5  design into all of them and pick the best for this gene
+  6  a vector map of my own (a file path)
+[1-6, or Enter for 5]
+> 1
+
+Where did the gene come from?
+This decides the intron and rare-codon checks, and nothing else uses it.
+A species (human, mouse, candida, plasmodium, leishmania, e. coli) or a
+clade (mammalian, yeast, bacterial, viral, synthetic). Enter to skip
+> human
+
+Also design the primers that verify the clone -- a colony screen and a
+Sanger panel covering both junctions? [Y/n]
+> y
+```
+
+Four questions, and the report follows. Two things the prompts do on
+purpose:
+
+- **Enter is always a valid answer.** Every question states its default,
+  and the defaults alone produce a sound design — including the vector,
+  where the default is to design into all four and take the best.
+- **A bad answer costs you one line, not the session.** A mistyped path, a
+  number outside the menu, an organism nobody has heard of: each is
+  re-asked with the reason. (That is not in tension with the refusal rule
+  below — that one is about not re-asking a *tool* after it declines, and
+  a person fixing a typo is not that.)
+
+It also reports what it understood before moving on — `read SOD1, 465 bp`
+and whether the sequence reads as a clean ORF — because finding out that
+you handed it an mRNA with its UTRs attached is worth knowing at question
+one rather than at the gel.
+
+You can paste the sequence instead of a path, in which case it asks what to
+call it, since the name ends up on the primers. At the end it offers to
+write the finished plasmid as GenBank.
+
+The session is scriptable, because the prompts read ordinary stdin:
+
+```bash
+printf 'SOD1.fasta\n1\nhuman\ny\nn\n' | clonewright interactive
+```
 
 ## What one run gives you
 
@@ -346,6 +416,8 @@ python -m clonewright annotate unannotated.fa -o annotated.gb
 
 | Command | What it does |
 |---|---|
+| *(none)* | Asks for what it needs, one question at a time |
+| `interactive` | The same session, explicitly — works through a pipe too |
 | `design GENE [--vector V]` | The whole pipeline. Omit `--vector` and it chooses |
 | `compare GENE` | Every bundled vector, ranked by designing into each |
 | `ask "sentence"` | Reads the request out of a sentence, then runs it |
@@ -365,27 +437,46 @@ a result, not a crash.**
 
 ---
 
-## Install and test
+## Install
+
+```bash
+pip install git+https://github.com/Ghatak-NU/clonewright
+clonewright
+```
+
+That puts `clonewright` on your PATH, with the four vector maps alongside
+the package, so it works from any directory. There is nothing else to
+install: the dependency list is empty, and the one optional extra
+(`pip install 'clonewright[agent]'`) is only for `ask --model`.
+
+From a checkout, in a virtual environment:
 
 ```bash
 git clone https://github.com/Ghatak-NU/clonewright
 cd clonewright
+pip install -e .
+```
+
+Or skip installing altogether — it runs from the checkout as a module:
+
+```bash
 python -m clonewright design examples/SOD1.fasta --vector pET-28a
 ```
 
-Nothing to install — it runs from the checkout. For the `clonewright`
-command on your PATH, `pip install -e .`.
+## Test
 
 ```bash
 python -m unittest discover -s tests
 ```
 
-128 tests, no network, a few seconds. They cover the published
+145 tests, no network, under a minute. They cover the published
 thermodynamic values, the GenBank round trip, cassette derivation on all
 four bundled maps, the enzyme geometry, the frame and product arithmetic
 (including that pET-28a leader), the strain checks, the three invariants,
-and the CLI's exit codes. Developed on Python 3.14; the code is standard
-library only and uses nothing newer than 3.10 syntax.
+the CLI's exit codes, and the interactive session — which is driven from a
+list of answers, because input and output are injected rather than called.
+Developed on Python 3.14; the code is standard library only and uses
+nothing newer than 3.10 syntax.
 
 ---
 

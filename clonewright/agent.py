@@ -62,6 +62,9 @@ def _rows() -> list[Tool]:
         # -- Layer 0: bytes in ------------------------------------------
         T("seqio.load", 0, seqio.load, (seqio.SequenceError,),
           summary="read a molecule from FASTA, GenBank or SnapGene .dna"),
+        T("seqio.load_sequence", 0, seqio.load_sequence,
+          (seqio.SequenceError,),
+          summary="the same, or a bare sequence pasted in as text"),
         T("vectors.resolve", 0, vectors.resolve, (vectors.VectorError,),
           summary="a bundled E. coli expression vector by name, or any map "
                   "by path"),

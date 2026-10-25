@@ -7,6 +7,7 @@ name = "clonewright"
 version = "0.1.0"
 description = "Restriction-cloning primers for E. coli expression, checked against the vector and the insert rather than assumed"
 readme = "README.md"
+authors = [{ name = "Sunandan Kaushik", email = "kaushiksunandan@gmail.com" }]
 requires-python = ">=3.10"
 license = "MIT"
 license-files = ["LICENSE"]

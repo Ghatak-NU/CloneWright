@@ -49,6 +49,9 @@ class VectorSpec:
     c_terminal: str
     purification: str
     note: str
+    # The tag layout in a few words, for a menu row or a table cell. The
+    # full sentences above are for a report, where there is room for them.
+    summary: str = ""
 
     @property
     def path(self) -> Path:
@@ -69,6 +72,7 @@ CATALOG: dict[str, VectorSpec] = {
         n_terminal="6xHis followed by a thrombin site",
         c_terminal="6xHis, downstream of the insert's own stop codon",
         purification="Ni-NTA on the N-terminal 6xHis; thrombin removes the tag",
+        summary="N-terminal 6xHis, cleavable",
         note="the default first choice for a His-tagged protein. Kanamycin "
              "rather than ampicillin, which matters for long inductions: "
              "beta-lactamase is secreted and ampicillin plates go permissive",
@@ -85,6 +89,7 @@ CATALOG: dict[str, VectorSpec] = {
         purification="Ni-NTA on the C-terminal 6xHis, which requires the "
                      "full-length product: a truncation loses the tag and "
                      "does not purify",
+        summary="untagged, unless you take the C-terminal 6xHis",
         note="for a protein whose N terminus has to stay free -- a mature "
              "sequence, or anything where an N-terminal tag blocks folding "
              "or activity",
@@ -100,6 +105,7 @@ CATALOG: dict[str, VectorSpec] = {
         c_terminal="nothing",
         purification="glutathione sepharose; thrombin releases the protein "
                      "from GST",
+        summary="N-terminal GST, 26 kDa, cleavable",
         note="the large soluble partner often rescues a protein that will not "
              "fold alone, at the cost of carrying 26 kDa through "
              "purification. No DE3 lysogen needed: tac is read by the host's "
@@ -115,6 +121,7 @@ CATALOG: dict[str, VectorSpec] = {
         n_terminal="maltose binding protein (about 42 kDa) and a factor Xa site",
         c_terminal="nothing",
         purification="amylose resin; factor Xa releases the protein from MBP",
+        summary="N-terminal MBP, 42 kDa, cleavable",
         note="the strongest solubility partner of the three, and the "
              "bulkiest. The c in c5X is cytoplasmic: there is no signal "
              "sequence, so the fusion stays in the cytoplasm",

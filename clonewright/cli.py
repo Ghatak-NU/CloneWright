@@ -17,7 +17,8 @@ from pathlib import Path
 
 from . import __version__
 from . import agent as agent_mod
-from . import cassette, construct, design, orchestrate, planner, report
+from . import cassette, construct, design, interactive, orchestrate
+from . import planner, report
 from . import seqio, vectors
 from .seqio import SequenceError
 from .trace import InvariantError
@@ -31,6 +32,7 @@ examples:
   clonewright design gene.fa --vector ./my-pET-28a.dna --json
   clonewright compare SOD1.fasta
   clonewright annotate unannotated-vector.fa -o annotated.gb
+  clonewright                                       # asks what it needs
   clonewright vectors
   clonewright tools
 """
@@ -126,6 +128,12 @@ def build_parser() -> argparse.ArgumentParser:
     k.add_argument("--dry-run", action="store_true",
                    help="print the request that was understood, and stop")
 
+    subs.add_parser(
+        "interactive", help="ask for what is needed, one question at a time",
+        description="The same pipeline, driven by four questions instead of "
+                    "flags. This is what bare `clonewright` runs when there "
+                    "is a terminal to ask on.",
+    )
     subs.add_parser("vectors", help="list the bundled vectors")
     subs.add_parser("tools", help="list the tool registry the agent drives")
     return p
@@ -329,6 +337,7 @@ def cmd_tools(_args) -> int:
 COMMANDS = {
     "design": cmd_design,
     "ask": cmd_ask,
+    "interactive": lambda _args: interactive.run(),
     "compare": cmd_compare,
     "annotate": cmd_annotate,
     "vectors": cmd_vectors,
@@ -340,6 +349,13 @@ def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
     if not args.command:
+        # Bare `clonewright` starts the interview -- that is what somebody
+        # who has just installed it types, and a wall of flags is a poor
+        # answer to it.  With no terminal on the other end there is nobody
+        # to interview, and a blocking prompt in a pipe or a CI step is
+        # worse than help text, so that case keeps the help.
+        if interactive.available():
+            return interactive.run()
         parser.print_help()
         return 2
     return COMMANDS[args.command](args)
