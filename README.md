@@ -15,7 +15,7 @@ install, nothing to compile. The only thing that ever touches the network
 is fetching a record you asked for by link, and that gets cached.
 
 ```bash
-pip install git+https://github.com/Ghatak-NU/clonewright
+pip install git+https://github.com/Ghatak-NU/CloneWright
 clonewright
 ```
 
@@ -514,7 +514,7 @@ a result, not a crash.**
 ## Install
 
 ```bash
-pip install git+https://github.com/Ghatak-NU/clonewright
+pip install git+https://github.com/Ghatak-NU/CloneWright
 clonewright
 ```
 
@@ -526,7 +526,7 @@ install: the dependency list is empty, and the one optional extra
 From a checkout, in a virtual environment:
 
 ```bash
-git clone https://github.com/Ghatak-NU/clonewright
+git clone https://github.com/Ghatak-NU/CloneWright
 cd clonewright
 pip install -e .
 ```

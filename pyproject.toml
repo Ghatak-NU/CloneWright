@@ -40,8 +40,8 @@ agent = ["anthropic>=0.40"]
 clonewright = "clonewright.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/Ghatak-NU/clonewright"
-Issues = "https://github.com/Ghatak-NU/clonewright/issues"
+Homepage = "https://github.com/Ghatak-NU/CloneWright"
+Issues = "https://github.com/Ghatak-NU/CloneWright/issues"
 
 [tool.setuptools]
 packages = ["clonewright"]
