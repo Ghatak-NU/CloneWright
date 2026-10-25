@@ -1,7 +1,7 @@
 # clonewright
 
 Designs restriction-cloning primers for expressing a gene in *E. coli*, and
-checks them against both molecules instead of assuming they work.
+checks them against both molecules.
 
 Give it a coding sequence — a file, a pasted sequence, or an NCBI link to
 the record you are looking at. It reads the vector, picks an enzyme pair
