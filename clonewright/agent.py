@@ -28,6 +28,7 @@ from . import (
     design,
     enzymes,
     expression,
+    ncbi,
     pcr,
     report,
     seqio,
@@ -68,6 +69,10 @@ def _rows() -> list[Tool]:
         T("vectors.resolve", 0, vectors.resolve, (vectors.VectorError,),
           summary="a bundled E. coli expression vector by name, or any map "
                   "by path"),
+        T("ncbi.resolve", 0, ncbi.resolve, (ncbi.FetchError,),
+          tunable=frozenset({"allow_network", "cache", "timeout", "email"}),
+          summary="fetch an NCBI link or accession and splice the coding "
+                  "sequence out of it"),
         T("cassette.annotate", 0, cassette.annotate,
           tunable=frozenset({"hints", "min_orf_bp"}),
           summary="derive the expression cassette of an unannotated vector "
@@ -141,6 +146,9 @@ def _rows() -> list[Tool]:
         # and never becomes another tool's input.
         T("report.render", 4, report.render, renders=True,
           summary="the design, as a bench-ready report"),
+        T("report.render_fetch", 4, report.render_fetch, renders=True,
+          summary="what came back from NCBI, and whether the splice checks "
+                  "out"),
         T("report.render_expression", 4, report.render_expression, renders=True,
           summary="the protein, the induction and the strain"),
         T("report.render_colony", 4, report.render_colony, renders=True,

@@ -580,3 +580,63 @@ def render_shortlist(usable, rejected) -> str:
                 lines.append(f"    {head}{chunk}")
         lines.append("")
     return "\n".join(lines).rstrip()
+
+def render_fetch(resolved) -> str:
+    """What was fetched from NCBI, and whether the splice can be trusted.
+
+    Printed whenever a gene arrived as a URL rather than a file, because
+    every step between the link and the sequence is a step the person did
+    not watch: which region came back, which of the genes in it was taken,
+    where the exon boundaries fell, and whether the result translates to
+    the protein the database says it should.
+    """
+    fetched = resolved.fetched
+    target = resolved.target
+    cds = resolved.chosen
+
+    lines = [_rule("fetched from NCBI")]
+    lines.append(f"  record         {target.accession}")
+    if fetched.definition:
+        for index, chunk in enumerate(_wrap(fetched.definition, 56)):
+            label = "  definition     " if index == 0 else "                 "
+            lines.append(f"{label}{chunk}")
+    if fetched.organism:
+        lines.append(f"  organism       {fetched.organism}")
+    if target.is_region:
+        lines.append(
+            f"  region         {target.start}-{target.end} "
+            f"({len(fetched)} bp retrieved)"
+        )
+    else:
+        lines.append(f"  retrieved      {len(fetched)} bp")
+    lines.append(
+        f"  provenance     {'local cache' if fetched.from_cache else 'live fetch, now cached'}"
+    )
+    lines.append("")
+
+    if fetched.coding:
+        lines.append("  coding sequences annotated in it:")
+        for candidate in fetched.coding:
+            mark = "->" if candidate is cds else "  "
+            flag = "  [pseudogene]" if candidate.pseudo else ""
+            lines.append(f"   {mark} {candidate.label()}{flag}")
+        lines.append("")
+
+    if cds is not None:
+        lines.append(f"  gene           {cds.gene or '(unnamed)'}")
+        if cds.product:
+            for index, chunk in enumerate(_wrap(cds.product, 56)):
+                label = "  product        " if index == 0 else "                 "
+                lines.append(f"{label}{chunk}")
+        if cds.protein_id:
+            lines.append(f"  protein        {cds.protein_id}")
+        spans = ", ".join(
+            f"{start + 1}-{end}" for start, end in cds.location.segments
+        )
+        strand = "forward" if cds.location.forward else "reverse"
+        lines.append(f"  exons          {spans}  ({strand} strand)")
+        lines.append(f"  coding length  {cds.length} bp")
+        lines.append("")
+
+    lines.extend(_issue_block(resolved.issues))
+    return "\n".join(lines).rstrip()

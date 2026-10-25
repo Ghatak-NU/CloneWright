@@ -34,6 +34,7 @@ import re
 from dataclasses import replace
 from pathlib import Path
 
+from . import ncbi as ncbi_mod
 from . import source as source_mod
 from . import strains as strains_mod
 from . import vectors as vectors_mod
@@ -76,6 +77,10 @@ def _looks_like_a_gene(token: str) -> bool:
     """
     if not token or token.lower() in _FILLER:
         return False
+    if ncbi_mod.looks_like_a_target(token):
+        # An NCBI link or accession names a gene as definitely as a file
+        # does, and `NM_007117.5` would otherwise read as filler.
+        return True
     if Path(token).exists():
         return True
     if re.search(r"\.(?:fa|fasta|gb|gbk|dna|txt|seq)$", token, re.I):

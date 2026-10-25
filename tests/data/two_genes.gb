@@ -1,0 +1,20 @@
+LOCUS       XX_000001                 30 bp    DNA     linear   SYN 01-JAN-2026
+DEFINITION  Synthetic test record holding two coding sequences.
+ACCESSION   XX_000001
+VERSION     XX_000001.1
+FEATURES             Location/Qualifiers
+     source          1..30
+                     /organism="synthetic construct"
+     CDS             1..12
+                     /gene="SHORT"
+                     /product="a three residue peptide"
+                     /protein_id="XP_000001.1"
+                     /translation="MWK"
+     CDS             13..30
+                     /gene="LONGER"
+                     /product="a five residue peptide"
+                     /protein_id="XP_000002.1"
+                     /translation="MAWKF"
+ORIGIN
+        1 atgtggaaat aaatggcgtg gaaattttaa
+//

@@ -19,7 +19,7 @@ from . import __version__
 from . import agent as agent_mod
 from . import cassette, construct, design, interactive, orchestrate
 from . import planner, report
-from . import seqio, vectors
+from . import ncbi, seqio, vectors
 from .seqio import SequenceError
 from .trace import InvariantError
 
@@ -29,6 +29,8 @@ examples:
   clonewright design SOD1.fasta                     # it picks the vector
   clonewright ask "clone SOD1.fasta into pET-28a, it is a human gene"
   clonewright design SOD1.fasta --vector pET-28a --origin human
+  clonewright design "https://www.ncbi.nlm.nih.gov/nuccore/NM_007117.5"
+  clonewright design NC_000003.12 --cds TRH --vector pGEX-4T-1
   clonewright design gene.fa --vector ./my-pET-28a.dna --json
   clonewright compare SOD1.fasta
   clonewright annotate unannotated-vector.fa -o annotated.gb
@@ -59,8 +61,9 @@ def build_parser() -> argparse.ArgumentParser:
                     "frame, the protein, the strain, and the primers that "
                     "prove the construct.",
     )
-    d.add_argument("insert", help="the gene: FASTA, GenBank, .dna, or a "
-                                  "bare sequence")
+    d.add_argument("insert", help="the gene: an NCBI link or accession, a "
+                                  "FASTA/GenBank/.dna file, or a bare "
+                                  "sequence")
     d.add_argument("--vector", default="", metavar="NAME|PATH",
                    help="a bundled vector by name, or any map by path. "
                         "Omit it and every bundled vector is tried and the "
@@ -68,6 +71,12 @@ def build_parser() -> argparse.ArgumentParser:
     d.add_argument("--mode", default="auto",
                    choices=("auto", "native", "nfusion", "cfusion"),
                    help="auto reads the vector and decides (default)")
+    d.add_argument("--cds", default="", metavar="GENE",
+                   help="which coding sequence to take, when an NCBI "
+                        "region holds more than one gene")
+    d.add_argument("--offline", action="store_true",
+                   help="never reach the network: read NCBI records from "
+                        "the local cache only")
     d.add_argument("--origin", default="", metavar="ORGANISM",
                    help="where the gene came from, e.g. human, yeast, "
                         "e.coli: decides the intron and rare-codon checks")
@@ -152,6 +161,8 @@ def _request(args) -> orchestrate.Request:
         expression_strain=getattr(args, "expression_strain", "bl21de3"),
         verify=not getattr(args, "no_verify", False),
         compare=getattr(args, "compare", False),
+        cds_gene=getattr(args, "cds", ""),
+        allow_network=not getattr(args, "offline", False),
     )
 
 
@@ -202,7 +213,7 @@ def cmd_design(args) -> int:
     except SequenceError as exc:
         print(f"clonewright: {exc}", file=sys.stderr)
         return 2
-    except vectors.VectorError as exc:
+    except (vectors.VectorError, ncbi.FetchError) as exc:
         print(f"clonewright: {exc}", file=sys.stderr)
         return 2
     except InvariantError as exc:
@@ -293,7 +304,7 @@ def cmd_ask(args) -> int:
 
     try:
         out = orchestrate.run(request)
-    except (SequenceError, vectors.VectorError) as exc:
+    except (SequenceError, vectors.VectorError, ncbi.FetchError) as exc:
         print(f"clonewright: {exc}", file=sys.stderr)
         return 2
     except InvariantError as exc:

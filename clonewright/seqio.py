@@ -249,32 +249,95 @@ def parse_snapgene(data: bytes, *, source: str = "<snapgene>") -> Record:
     return Record(Path(source).stem, _clean(seq, source=source), circular, features)
 
 
-_LOCATION = re.compile(r"(\d+)\s*\.\.\s*(\d+)")
+# A bound may carry a `<` or `>` partial marker, and it may carry it on
+# either end of the range: `<1..228`, `18..>228`, `<1..>228` are all real
+# GenBank. Leaving the markers out of the pattern does not produce a
+# wrong answer, it produces no answer -- the location fails to parse and
+# the feature disappears. NCBI writes `18..>228` for a CDS that runs off
+# the end of a requested region, which is precisely the case worth
+# reporting clearly, so the feature going missing there was the worst
+# place for it to happen.
+_LOCATION = re.compile(r"[<>]?(\d+)\s*\.\.\s*[<>]?(\d+)")
+_PARTIAL = re.compile(r"[<>]")
 
 
-def _parse_location(raw: str) -> tuple[int, int, bool] | None:
-    """A GenBank location as (start, end, forward), 0-based half-open.
+@dataclass(frozen=True)
+class Location:
+    """Where a feature sits, keeping its pieces.
 
-    Handles the forms a plasmid map actually uses: `1..20`,
-    `complement(1..20)`, `join(5300..5369,1..40)` for a feature that runs
-    across the origin, and the `<1..>20` partial markers, which are
-    stripped because a partial feature still occupies the span it names.
+    `segments` are 0-based half-open spans in ascending coordinate order,
+    one per exon of a joined location.  `start` and `end` are the outer
+    bounds, which is all most callers want; the segments matter to exactly
+    one caller, and it is the one that matters most -- splicing a coding
+    sequence out of genomic DNA. Collapsing `join(1098..1308,1980..2497)`
+    to 1098..2497 there would silently include 671 bases of intron.
 
-    A joined span is reported as its outer bounds rather than its pieces.
-    That is the right answer for the one question asked of it here -- how
-    far does this feature reach -- and the wrong one for translating a
-    spliced CDS, which nothing in this package does.
+    `partial` records a `<` or `>` marker. A partial feature still
+    occupies the span it names, so the bounds are kept, but the flag is
+    the difference between "this is the gene" and "this is as much of the
+    gene as the region you asked for contains".
+    """
+
+    segments: tuple[tuple[int, int], ...]
+    forward: bool = True
+    partial: bool = False
+
+    @property
+    def start(self) -> int:
+        return min(s for s, _ in self.segments)
+
+    @property
+    def end(self) -> int:
+        return max(e for _, e in self.segments)
+
+    @property
+    def spliced_length(self) -> int:
+        return sum(e - s for s, e in self.segments)
+
+    def extract(self, seq: str) -> str:
+        """The feature's own sequence, exons joined and strand applied.
+
+        GenBank's `complement(join(a,b))` means: concatenate the pieces in
+        the order written, then reverse complement the result. Doing it in
+        that order rather than reverse-complementing each piece is what
+        keeps the exon boundaries in the right places.
+        """
+        joined = "".join(seq[s:e] for s, e in self.segments)
+        return joined if self.forward else revcomp(joined)
+
+
+def parse_location(raw: str) -> Location | None:
+    """Read a GenBank location string.
+
+    Handles the forms that turn up in real records: `1..20`,
+    `complement(1..20)`, `join(1098..1308,1980..2497)` for a spliced CDS,
+    `join(5300..5369,1..40)` for a plasmid feature crossing the origin,
+    `complement(join(...))`, and the `<1..>20` partial markers.
     """
     bounds = _LOCATION.findall(raw)
+    forward = "complement" not in raw.lower()
+    partial = bool(_PARTIAL.search(raw))
     if not bounds:
-        single = re.fullmatch(r"\s*[<>]?(\d+)\s*", raw)
+        single = re.fullmatch(r"\s*[<>]?(\d+)[<>]?\s*", raw)
         if not single:
             return None
         pos = int(single.group(1))
-        return pos - 1, pos, True
-    starts = [int(a) for a, _ in bounds]
-    ends = [int(b) for _, b in bounds]
-    return min(starts) - 1, max(ends), "complement" not in raw.lower()
+        return Location(((pos - 1, pos),), forward, partial)
+    segments = tuple(sorted((int(a) - 1, int(b)) for a, b in bounds))
+    return Location(segments, forward, partial)
+
+
+def _parse_location(raw: str) -> tuple[int, int, bool] | None:
+    """The outer bounds of a location, for the feature table.
+
+    `Feature` carries one span, because that is what every question about
+    a plasmid map needs. Splicing asks a different question and calls
+    `parse_location` directly.
+    """
+    location = parse_location(raw)
+    if location is None:
+        return None
+    return location.start, location.end, location.forward
 
 
 def parse_genbank(text: str, *, source: str = "<genbank>") -> Record:

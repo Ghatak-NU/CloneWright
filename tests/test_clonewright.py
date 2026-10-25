@@ -15,6 +15,7 @@ here instead of at a bench three weeks later.
 
 from __future__ import annotations
 
+import dataclasses
 import io
 import json
 import sys
@@ -34,6 +35,7 @@ from clonewright import design as dz  # noqa: E402
 from clonewright import enzymes as ez  # noqa: E402
 from clonewright import expression  # noqa: E402
 from clonewright import interactive  # noqa: E402
+from clonewright import ncbi  # noqa: E402
 from clonewright import orchestrate  # noqa: E402
 from clonewright import planner  # noqa: E402
 from clonewright import report  # noqa: E402
@@ -479,6 +481,28 @@ class TestDesign(unittest.TestCase):
             dz.design(gene("SOD1"), FLAT_VECTOR, dz.Options(mode="auto"))
         self.assertIn("single-cutter", str(caught.exception))
         self.assertTrue(getattr(caught.exception, "issues", None))
+
+    def test_an_insert_too_short_to_prime_is_refused_not_crashed(self):
+        """It used to raise a bare ValueError out of the primer picker,
+        which is not an exception `design` declares, so it left the
+        command line as a traceback. An NCBI region whose only coding
+        sequence is a short peptide reaches this honestly."""
+        tiny = seqio.Record("tiny", "ATGTGGAAATAA")
+        with self.assertRaises(dz.DesignFailed) as caught:
+            dz.design(tiny, vector("pET-28a"), dz.Options(mode="auto"))
+        text = " ".join(i.text for i in caught.exception.issues)
+        self.assertIn("12 bp", text)
+        self.assertIn("synthesised oligonucleotides", text)
+
+    def test_a_short_insert_exits_cleanly_through_the_cli(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "tiny.fa"
+            path.write_text(">tiny\nATGTGGAAATAA\n", encoding="utf-8")
+            code, text, err = run_cli(
+                "design", str(path), "--vector", "pET-28a", "--no-verify",
+            )
+        self.assertEqual(code, 1)
+        self.assertNotIn("Traceback", text + err)
 
     def test_a_raised_refusal_carries_error_level_issues_only(self):
         try:
@@ -1208,6 +1232,435 @@ class TestCLI(unittest.TestCase):
 
 
 # ---------------------------------------------------------------------------
+# fetching from NCBI
+# ---------------------------------------------------------------------------
+
+
+DATA = ROOT / "tests" / "data"
+TRH_URL = (
+    "https://www.ncbi.nlm.nih.gov/nuccore/NC_000003.12"
+    "?report=genbank&from=129974720&to=129977935"
+)
+# The protein NCBI annotates for the TRH CDS, NP_009048.1, as the fixture
+# carries it. Held here as well so the cross-check is tested against a
+# value written down rather than one read out of the same file.
+TRH_PROTEIN_LENGTH = 242
+TRH_CDS_LENGTH = 729
+
+
+def fixture(name: str) -> str:
+    return (DATA / name).read_text(encoding="utf-8")
+
+
+class TestLocations(unittest.TestCase):
+    def test_a_simple_span(self):
+        location = seqio.parse_location("1..20")
+        self.assertEqual(location.segments, ((0, 20),))
+        self.assertTrue(location.forward)
+        self.assertFalse(location.partial)
+
+    def test_complement_flips_the_strand_not_the_bounds(self):
+        location = seqio.parse_location("complement(1..20)")
+        self.assertEqual(location.segments, ((0, 20),))
+        self.assertFalse(location.forward)
+
+    def test_a_join_keeps_its_pieces(self):
+        location = seqio.parse_location("join(1098..1308,1980..2497)")
+        self.assertEqual(location.segments, ((1097, 1308), (1979, 2497)))
+        self.assertEqual(location.spliced_length, TRH_CDS_LENGTH)
+        # The outer bounds include the intron, which is the answer a
+        # feature table wants and the wrong one for splicing.
+        self.assertEqual(location.end - location.start, 1400)
+
+    def test_partial_markers_inside_a_range_still_parse(self):
+        """`18..>228` is what NCBI writes for a CDS running off the end of
+        a requested region. A pattern that misses it does not give a wrong
+        answer, it makes the feature disappear -- in exactly the case
+        worth reporting clearly."""
+        location = seqio.parse_location("18..>228")
+        self.assertIsNotNone(location)
+        self.assertEqual(location.segments, ((17, 228),))
+        self.assertTrue(location.partial)
+
+    def test_every_partial_spelling(self):
+        for raw in ("<1..228", "18..>228", "<1..>228"):
+            self.assertTrue(seqio.parse_location(raw).partial, raw)
+
+    def test_extract_joins_then_complements(self):
+        # Two codons on the reverse strand: revcomp(ATG+TGG) is CCACAT.
+        seq = "CCACAT"
+        location = seqio.parse_location("complement(join(1..3,4..6))")
+        self.assertEqual(location.extract(seq), "ATGTGG")
+
+    def test_nonsense_is_refused_rather_than_guessed(self):
+        self.assertIsNone(seqio.parse_location("somewhere in the middle"))
+
+
+class TestTargets(unittest.TestCase):
+    def test_the_region_url_from_the_nucleotide_viewer(self):
+        target = ncbi.parse_target(TRH_URL)
+        self.assertEqual(target.accession, "NC_000003.12")
+        self.assertEqual((target.start, target.end), (129974720, 129977935))
+        self.assertTrue(target.is_region)
+
+    def test_a_url_with_no_region(self):
+        target = ncbi.parse_target(
+            "https://www.ncbi.nlm.nih.gov/nuccore/NM_007117.5"
+        )
+        self.assertEqual(target.accession, "NM_007117.5")
+        self.assertFalse(target.is_region)
+
+    def test_a_bare_accession(self):
+        for text in ("NM_007117.5", "NC_000003.12", "nm_007117"):
+            self.assertTrue(ncbi.looks_like_a_target(text), text)
+            self.assertEqual(
+                ncbi.parse_target(text).accession, text.upper()
+            )
+
+    def test_a_file_path_is_not_a_target(self):
+        self.assertFalse(ncbi.looks_like_a_target("examples/SOD1.fasta"))
+        self.assertFalse(ncbi.looks_like_a_target("ATGGCGACGAAGGCC"))
+
+    def test_a_reversed_view_is_the_minus_strand(self):
+        target = ncbi.parse_target(
+            "https://www.ncbi.nlm.nih.gov/nuccore/X?from=1&to=9&strand=true"
+        )
+        self.assertEqual(target.strand, 2)
+        self.assertIn("strand=2", ncbi.efetch_url(target))
+
+    def test_positions_are_ordered_and_commas_tolerated(self):
+        target = ncbi.parse_target(
+            "https://www.ncbi.nlm.nih.gov/nuccore/X?from=9,000&to=1,000"
+        )
+        self.assertEqual((target.start, target.end), (1000, 9000))
+
+    def test_a_gene_page_says_what_to_paste_instead(self):
+        with self.assertRaises(ncbi.FetchError) as caught:
+            ncbi.parse_target("https://www.ncbi.nlm.nih.gov/gene/7200")
+        self.assertIn("nuccore", str(caught.exception))
+
+    def test_a_non_ncbi_url_is_refused(self):
+        with self.assertRaises(ncbi.FetchError):
+            ncbi.parse_target("https://example.com/nuccore/NM_007117.5")
+
+    def test_half_a_region_is_refused(self):
+        with self.assertRaises(ncbi.FetchError):
+            ncbi.parse_target(
+                "https://www.ncbi.nlm.nih.gov/nuccore/X?from=100"
+            )
+
+    def test_the_fetch_url_carries_the_region_and_identifies_itself(self):
+        url = ncbi.efetch_url(ncbi.parse_target(TRH_URL))
+        self.assertIn("seq_start=129974720", url)
+        self.assertIn("seq_stop=129977935", url)
+        self.assertIn("tool=clonewright", url)
+        # A chromosome is a CON record: plain `gb` returns no sequence.
+        self.assertIn(f"rettype={ncbi.RETTYPE}", url)
+
+
+class TestSplicing(unittest.TestCase):
+    """Against saved records, so these run with no network."""
+
+    def record(self, name: str = "TRH_region.gb") -> ncbi.FetchedRecord:
+        return ncbi.parse_record(fixture(name))
+
+    def test_the_record_is_read(self):
+        record = self.record()
+        self.assertEqual(record.accession, "NC_000003.12")
+        self.assertEqual(record.organism, "Homo sapiens")
+        self.assertEqual(len(record), 3216)
+
+    def test_the_two_exon_cds_is_found_with_both_exons(self):
+        cds = self.record().coding[0]
+        self.assertEqual(cds.gene, "TRH")
+        self.assertEqual(cds.exons, 2)
+        self.assertEqual(cds.location.segments, ((1097, 1308), (1979, 2497)))
+        self.assertEqual(cds.length, TRH_CDS_LENGTH)
+
+    def test_the_translation_qualifier_is_joined_without_gaps(self):
+        """A /translation is one word wrapped across many lines; joining it
+        with spaces would make every comparison fail."""
+        cds = self.record().coding[0]
+        self.assertEqual(len(cds.translation), TRH_PROTEIN_LENGTH)
+        self.assertTrue(cds.translation.startswith("MPGPWLLLALALTLNLTGVPG"))
+        self.assertNotIn(" ", cds.translation)
+
+    def test_the_spliced_sequence_is_a_coding_sequence(self):
+        record = self.record()
+        coding = ncbi.spliced(record.coding[0], record.seq)
+        self.assertEqual(len(coding), TRH_CDS_LENGTH)
+        self.assertTrue(coding.startswith("ATG"))
+        self.assertIn(coding[-3:], ("TAA", "TAG", "TGA"))
+        self.assertEqual(len(coding) % 3, 0)
+
+    def test_the_splice_is_confirmed_against_ncbis_own_protein(self):
+        record = self.record()
+        issues = ncbi.check(record.coding[0], record.seq)
+        self.assertEqual([i for i in issues if i.level == "error"], [])
+        self.assertTrue(
+            any("splice is confirmed" in i.text for i in issues)
+        )
+
+    def test_the_cross_check_catches_a_wrong_splice(self):
+        """The test the cross-check exists for: move one exon boundary by a
+        single base and the sequence still looks like DNA, still amplifies,
+        and encodes a different protein."""
+        record = self.record()
+        original = record.coding[0]
+        shifted = dataclasses.replace(
+            original,
+            location=seqio.Location(
+                ((1096, 1308), (1979, 2497)), True, False
+            ),
+        )
+        issues = ncbi.check(shifted, record.seq)
+        errors = [i for i in issues if i.level == "error"]
+        self.assertTrue(errors)
+        self.assertTrue(
+            any("does not translate to the protein" in i.text
+                for i in errors)
+        )
+
+    def test_an_intron_is_reported_as_left_out(self):
+        record = self.record()
+        issues = ncbi.check(record.coding[0], record.seq)
+        intron = next(i for i in issues if "intron" in i.text)
+        self.assertIn("671 bp of intron", intron.text)
+        self.assertIn("cDNA", intron.text)
+
+    def test_the_mrna_record_gives_the_same_coding_sequence(self):
+        """Two independent routes to one gene: a genomic region that has to
+        be spliced, and an mRNA whose CDS sits inside the UTRs."""
+        genomic = self.record()
+        mrna = self.record("TRH_mRNA.gb")
+        self.assertEqual(mrna.coding[0].exons, 1)
+        self.assertEqual(
+            ncbi.spliced(genomic.coding[0], genomic.seq),
+            ncbi.spliced(mrna.coding[0], mrna.seq),
+        )
+
+    def test_the_cds_is_cut_out_of_the_mrnas_utrs(self):
+        mrna = self.record("TRH_mRNA.gb")
+        self.assertLess(mrna.coding[0].length, len(mrna))
+        self.assertFalse(mrna.seq.startswith("ATG"))
+        self.assertTrue(
+            ncbi.spliced(mrna.coding[0], mrna.seq).startswith("ATG")
+        )
+
+    def test_a_cut_region_is_refused_as_partial(self):
+        record = self.record("TRH_cut_region.gb")
+        self.assertTrue(record.coding, "the CDS must not disappear")
+        cds = record.coding[0]
+        self.assertTrue(cds.location.partial)
+        errors = [
+            i for i in ncbi.check(cds, record.seq) if i.level == "error"
+        ]
+        self.assertTrue(any("cuts TRH short" in i.text for i in errors))
+
+    def test_a_partial_cds_is_not_blamed_on_the_arithmetic(self):
+        record = self.record("TRH_cut_region.gb")
+        issues = ncbi.check(record.coding[0], record.seq)
+        self.assertFalse(
+            any("boundaries or the strand have been read wrongly" in i.text
+                for i in issues)
+        )
+
+    def test_a_region_with_no_coding_sequence_is_refused(self):
+        record = self.record("TRH_no_cds.gb")
+        chosen, issues = ncbi.choose(record)
+        self.assertIsNone(chosen)
+        self.assertTrue(any(i.level == "error" for i in issues))
+        self.assertIn("no annotated coding sequence", issues[0].text)
+
+    def test_a_reverse_strand_cds_is_spliced_on_the_right_strand(self):
+        """Hand-built, because the fixtures are all forward-strand: the
+        exons encode MWK and sit on the minus strand."""
+        coding = "ATGTGGAAATAA"
+        record_seq = seqio.revcomp(coding)
+        text = (
+            "LOCUS       TEST                      12 bp    DNA     linear\n"
+            "DEFINITION  a minus-strand test case.\n"
+            "FEATURES             Location/Qualifiers\n"
+            "     CDS             complement(1..12)\n"
+            '                     /gene="mwk"\n'
+            '                     /translation="MWK"\n'
+            "ORIGIN\n"
+            f"        1 {record_seq.lower()}\n"
+            "//\n"
+        )
+        record = ncbi.parse_record(text)
+        cds = record.coding[0]
+        self.assertFalse(cds.location.forward)
+        self.assertEqual(ncbi.spliced(cds, record.seq), coding)
+        self.assertTrue(
+            any("splice is confirmed" in i.text
+                for i in ncbi.check(cds, record.seq))
+        )
+
+
+class TestChoosingTheGene(unittest.TestCase):
+    def two_genes(self) -> ncbi.FetchedRecord:
+        record = ncbi.parse_record(fixture("TRH_region.gb"))
+        extra = dataclasses.replace(
+            record.coding[0],
+            gene="OTHER",
+            location=seqio.Location(((0, 300),), True, False),
+            translation="",
+        )
+        record.coding.append(extra)
+        return record
+
+    def test_one_coding_sequence_needs_no_decision(self):
+        record = ncbi.parse_record(fixture("TRH_region.gb"))
+        chosen, issues = ncbi.choose(record)
+        self.assertEqual(chosen.gene, "TRH")
+        self.assertEqual(issues, [])
+
+    def test_several_takes_the_longest_and_says_so(self):
+        chosen, issues = ncbi.choose(self.two_genes())
+        self.assertEqual(chosen.gene, "TRH")
+        self.assertTrue(
+            any(i.level == "warning" and "2 coding sequences" in i.text
+                for i in issues)
+        )
+
+    def test_a_name_settles_it(self):
+        chosen, _ = ncbi.choose(self.two_genes(), gene="OTHER")
+        self.assertEqual(chosen.gene, "OTHER")
+
+    def test_a_name_that_matches_nothing_lists_what_is_there(self):
+        chosen, issues = ncbi.choose(self.two_genes(), gene="BRCA1")
+        self.assertIsNone(chosen)
+        self.assertIn("TRH", issues[0].text)
+
+    def test_a_pseudogene_is_not_a_candidate(self):
+        record = ncbi.parse_record(fixture("TRH_region.gb"))
+        record.coding = [
+            dataclasses.replace(record.coding[0], pseudo=True)
+        ]
+        chosen, issues = ncbi.choose(record)
+        self.assertIsNone(chosen)
+        self.assertIn("pseudogene", issues[0].text)
+
+
+class TestFetchCache(unittest.TestCase):
+    """The cache is what makes a fetched design reproducible, so it is
+    tested as behaviour rather than trusted."""
+
+    def test_a_cached_record_is_read_without_the_network(self):
+        target = ncbi.parse_target(TRH_URL)
+        with tempfile.TemporaryDirectory() as tmp:
+            cache = Path(tmp)
+            ncbi.write_cached(target, fixture("TRH_region.gb"), cache)
+            text, from_cache = ncbi.fetch(
+                target, allow_network=False, cache=cache
+            )
+        self.assertTrue(from_cache)
+        self.assertIn("TRH", text)
+
+    def test_the_cache_name_includes_the_region(self):
+        a = ncbi.parse_target(TRH_URL)
+        b = ncbi.parse_target(
+            "https://www.ncbi.nlm.nih.gov/nuccore/NC_000003.12"
+            "?from=1&to=100"
+        )
+        self.assertNotEqual(ncbi.cache_path(a).name, ncbi.cache_path(b).name)
+        self.assertIn("129974720-129977935", ncbi.cache_path(a).name)
+
+    def test_offline_with_a_cold_cache_says_so(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            with self.assertRaises(ncbi.FetchError) as caught:
+                ncbi.fetch(
+                    ncbi.parse_target(TRH_URL),
+                    allow_network=False, cache=Path(tmp),
+                )
+        self.assertIn("network is switched off", str(caught.exception))
+
+    def test_a_truncated_cache_entry_is_ignored(self):
+        target = ncbi.parse_target(TRH_URL)
+        with tempfile.TemporaryDirectory() as tmp:
+            cache = Path(tmp)
+            ncbi.cache_path(target, cache).parent.mkdir(
+                parents=True, exist_ok=True
+            )
+            ncbi.cache_path(target, cache).write_text(
+                "LOCUS  half a file", encoding="utf-8"
+            )
+            self.assertIsNone(ncbi.read_cached(target, cache))
+
+
+class TestFetchedDesign(unittest.TestCase):
+    """The whole pipeline from a URL, served from a primed cache."""
+
+    def run_from_url(self, url: str, **kwargs):
+        with tempfile.TemporaryDirectory() as tmp:
+            cache = Path(tmp)
+            for name, source in (
+                (TRH_URL, "TRH_region.gb"),
+                ("NM_007117.5", "TRH_mRNA.gb"),
+            ):
+                ncbi.write_cached(
+                    ncbi.parse_target(name), fixture(source), cache
+                )
+            original = ncbi.default_cache
+            ncbi.default_cache = lambda: cache
+            try:
+                return orchestrate.run(orchestrate.Request(
+                    insert=url, allow_network=False, **kwargs
+                ))
+            finally:
+                ncbi.default_cache = original
+
+    def test_a_url_designs_end_to_end_and_passes_the_audit(self):
+        out = self.run_from_url(TRH_URL, vector="pET-28a", verify=False)
+        self.assertFalse(out.refused)
+        self.assertEqual(
+            {k: v for k, v in
+             tracing.audit(out.trace, out.answer).items() if v}, {}
+        )
+
+    def test_the_fetch_panel_reports_the_exons_and_the_confirmation(self):
+        out = self.run_from_url(TRH_URL, vector="pET-28a", verify=False)
+        self.assertIn("1098-1308, 1980-2497", out.answer)
+        self.assertIn("splice is confirmed", out.answer)
+        self.assertIn("NP_009048.1", out.answer)
+
+    def test_the_gene_name_comes_from_the_record(self):
+        out = self.run_from_url(TRH_URL, vector="pET-28a", verify=False)
+        self.assertIn("TRH_F", out.answer)
+        self.assertEqual(out.design.insert.name, "TRH")
+
+    def test_the_insert_is_the_spliced_cds_not_the_region(self):
+        out = self.run_from_url(TRH_URL, vector="pET-28a", verify=False)
+        self.assertEqual(len(out.design.insert), TRH_CDS_LENGTH)
+
+    def test_an_accession_works_as_well_as_a_url(self):
+        out = self.run_from_url("NM_007117.5", vector="pET-28a",
+                                verify=False)
+        self.assertFalse(out.refused)
+        self.assertEqual(len(out.design.insert), TRH_CDS_LENGTH)
+
+    def test_it_can_choose_a_vector_for_a_fetched_gene(self):
+        out = self.run_from_url(TRH_URL, verify=False)
+        self.assertFalse(out.refused)
+        self.assertTrue(out.candidates)
+
+    def test_a_fetch_that_cannot_be_served_refuses_rather_than_crashes(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            original = ncbi.default_cache
+            ncbi.default_cache = lambda: Path(tmp)
+            try:
+                out = orchestrate.run(orchestrate.Request(
+                    insert=TRH_URL, vector="pET-28a", allow_network=False,
+                ))
+            finally:
+                ncbi.default_cache = original
+        self.assertTrue(out.refused)
+        self.assertIsNone(out.design)
+        self.assertIn("network is switched off", out.answer)
+
+
+# ---------------------------------------------------------------------------
 # the interactive session
 # ---------------------------------------------------------------------------
 
@@ -1322,6 +1775,65 @@ class TestInteractive(unittest.TestCase):
         self.assertEqual(code, 1)
         self.assertIn("mammalian", text)
         self.assertIn("refusal, not a crash", text)
+
+    def primed_cache(self, tmp: str) -> None:
+        """Fill a cache so the session fetches nothing."""
+        for name, source in (
+            (TRH_URL, "TRH_region.gb"),
+            ("XX_000001.1", "two_genes.gb"),
+        ):
+            ncbi.write_cached(
+                ncbi.parse_target(name), fixture(source), Path(tmp)
+            )
+
+    def offline_session(self, tmp: str, answers: list[str]):
+        self.primed_cache(tmp)
+        original = ncbi.default_cache
+        ncbi.default_cache = lambda: Path(tmp)
+        try:
+            console, printed = interactive.Console.scripted(answers)
+            code = interactive.run(console)
+        finally:
+            ncbi.default_cache = original
+        return code, "\n".join(printed)
+
+    def test_an_ncbi_link_is_fetched_and_spliced(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            code, text = self.offline_session(
+                tmp, [TRH_URL, "1", "", "n", "n"]
+            )
+        self.assertEqual(code, 0)
+        self.assertIn("fetching from NCBI", text)
+        self.assertIn("splice is confirmed", text)
+        self.assertIn("read TRH, 729 bp", text)
+        self.assertIn("TRH_F", text)
+
+    def test_a_region_with_two_genes_asks_which_one(self):
+        """The longest-wins rule is a guess, and the person looking at the
+        page knows which gene they linked."""
+        with tempfile.TemporaryDirectory() as tmp:
+            code, text = self.offline_session(
+                tmp, ["XX_000001.1", "1", "6", str(MAPS / "pET-28a.gb"),
+                      "", "n", "n"],
+            )
+        self.assertIn("2 coding sequences", text)
+        self.assertIn("SHORT", text)
+        self.assertIn("LONGER", text)
+        # Answering 1 takes SHORT, not the longest.
+        self.assertIn("read SHORT", text)
+        self.assertIn("12 bp", text)
+        self.assertEqual(code, 1)  # a 12 bp insert is refused downstream
+
+    def test_a_link_that_cannot_be_fetched_is_re_asked(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            code, text = self.offline_session(
+                tmp,
+                ["https://www.ncbi.nlm.nih.gov/gene/7200", SOD1,
+                 "1", "", "n", "n"],
+            )
+        self.assertEqual(code, 0)
+        self.assertIn("gene page", text)
+        self.assertIn("read SOD1", text)
 
     def test_the_interactive_subcommand_runs_the_same_thing(self):
         original = cli.interactive.run

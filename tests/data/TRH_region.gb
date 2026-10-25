@@ -1,0 +1,308 @@
+LOCUS       NC_000003               3216 bp    DNA     linear   CON 06-AUG-2025
+DEFINITION  Homo sapiens chromosome 3, GRCh38.p14 Primary Assembly.
+ACCESSION   NC_000003 REGION: 129974720..129977935
+VERSION     NC_000003.12
+DBLINK      BioProject: PRJNA168
+            Assembly: GCF_000001405.40
+KEYWORDS    RefSeq.
+SOURCE      Homo sapiens (human)
+  ORGANISM  Homo sapiens
+            Eukaryota; Metazoa; Chordata; Craniata; Vertebrata; Euteleostomi;
+            Mammalia; Eutheria; Euarchontoglires; Primates; Haplorrhini;
+            Catarrhini; Hominidae; Homo.
+REFERENCE   1  (bases 1 to 3216)
+  AUTHORS   Gregory,S.G., Barlow,K.F., McLay,K.E., Kaul,R., Swarbreck,D.,
+            Dunham,A., Scott,C.E., Howe,K.L., Woodfine,K., Spencer,C.C.,
+            Jones,M.C., Gillson,C., Searle,S., Zhou,Y., Kokocinski,F.,
+            McDonald,L., Evans,R., Phillips,K., Atkinson,A., Cooper,R.,
+            Jones,C., Hall,R.E., Andrews,T.D., Lloyd,C., Ainscough,R.,
+            Almeida,J.P., Ambrose,K.D., Anderson,F., Andrew,R.W., Ashwell,R.I.,
+            Aubin,K., Babbage,A.K., Bagguley,C.L., Bailey,J., Beasley,H.,
+            Bethel,G., Bird,C.P., Bray-Allen,S., Brown,J.Y., Brown,A.J.,
+            Buckley,D., Burton,J., Bye,J., Carder,C., Chapman,J.C., Clark,S.Y.,
+            Clarke,G., Clee,C., Cobley,V., Collier,R.E., Corby,N.,
+            Coville,G.J., Davies,J., Deadman,R., Dunn,M., Earthrowl,M.,
+            Ellington,A.G., Errington,H., Frankish,A., Frankland,J., French,L.,
+            Garner,P., Garnett,J., Gay,L., Ghori,M.R., Gibson,R., Gilby,L.M.,
+            Gillett,W., Glithero,R.J., Grafham,D.V., Griffiths,C.,
+            Griffiths-Jones,S., Grocock,R., Hammond,S., Harrison,E.S., Hart,E.,
+            Haugen,E., Heath,P.D., Holmes,S., Holt,K., Howden,P.J., Hunt,A.R.,
+            Hunt,S.E., Hunter,G., Isherwood,J., James,R., Johnson,C.,
+            Johnson,D., Joy,A., Kay,M., Kershaw,J.K., Kibukawa,M.,
+            Kimberley,A.M., King,A., Knights,A.J., Lad,H., Laird,G., Lawlor,S.,
+            Leongamornlert,D.A., Lloyd,D.M., Loveland,J., Lovell,J., Lush,M.J.,
+            Lyne,R., Martin,S., Mashreghi-Mohammadi,M., Matthews,L.,
+            Matthews,N.S., McLaren,S., Milne,S., Mistry,S., Moore,M.J.,
+            Nickerson,T., O'Dell,C.N., Oliver,K., Palmeiri,A., Palmer,S.A.,
+            Parker,A., Patel,D., Pearce,A.V., Peck,A.I., Pelan,S., Phelps,K.,
+            Phillimore,B.J., Plumb,R., Rajan,J., Raymond,C., Rouse,G.,
+            Saenphimmachak,C., Sehra,H.K., Sheridan,E., Shownkeen,R., Sims,S.,
+            Skuce,C.D., Smith,M., Steward,C., Subramanian,S., Sycamore,N.,
+            Tracey,A., Tromans,A., Van Helmond,Z., Wall,M., Wallis,J.M.,
+            White,S., Whitehead,S.L., Wilkinson,J.E., Willey,D.L., Williams,H.,
+            Wilming,L., Wray,P.W., Wu,Z., Coulson,A., Vaudin,M., Sulston,J.E.,
+            Durbin,R., Hubbard,T., Wooster,R., Dunham,I., Carter,N.P.,
+            McVean,G., Ross,M.T., Harrow,J., Olson,M.V., Beck,S., Rogers,J.,
+            Bentley,D.R., Banerjee,R., Bryant,S.P., Burford,D.C., Burrill,W.D.,
+            Clegg,S.M., Dhami,P., Dovey,O., Faulkner,L.M., Gribble,S.M.,
+            Langford,C.F., Pandian,R.D., Porter,K.M. and Prigmore,E.
+  TITLE     The DNA sequence and biological annotation of human chromosome 1
+  JOURNAL   Nature 441 (7091), 315-321 (2006)
+   PUBMED   16710414
+  REMARK    Erratum:[Nature. 2006 Oct 26;443(7114):1013. Banerjee, R [added];
+            Bryant, SP [added]; Burford, DC [added]; Burrill, WDH [added];
+            Clegg, SM [added]; Dhami, P [added]; Dovey, O [added]; Faulkner, LM
+            [added]; Gribble, SM [added]; Langford, CF [added]; Pandian, RD
+            [added]; Porter, KM [added]; Prigmore, E [added]]
+REFERENCE   2  (bases 1 to 3216)
+  AUTHORS   Muzny,D.M., Scherer,S.E., Kaul,R., Wang,J., Yu,J., Sudbrak,R.,
+            Buhay,C.J., Chen,R., Cree,A., Ding,Y., Dugan-Rocha,S., Gill,R.,
+            Gunaratne,P., Harris,R.A., Hawes,A.C., Hernandez,J., Hodgson,A.V.,
+            Hume,J., Jackson,A., Khan,Z.M., Kovar-Smith,C., Lewis,L.R.,
+            Lozado,R.J., Metzker,M.L., Milosavljevic,A., Miner,G.R.,
+            Morgan,M.B., Nazareth,L.V., Scott,G., Sodergren,E., Song,X.Z.,
+            Steffen,D., Wei,S., Wheeler,D.A., Wright,M.W., Worley,K.C.,
+            Yuan,Y., Zhang,Z., Adams,C.Q., Ansari-Lari,M.A., Ayele,M.,
+            Brown,M.J., Chen,G., Chen,Z., Clendenning,J.,
+            Clerc-Blankenburg,K.P., Chen,R., Chen,Z., Davis,C., Delgado,O.,
+            Dinh,H.H., Dong,W., Draper,H., Ernst,S., Fu,G.,
+            Gonzalez-Garay,M.L., Garcia,D.K., Gillett,W., Gu,J., Hao,B.,
+            Haugen,E., Havlak,P., He,X., Hennig,S., Hu,S., Huang,W.,
+            Jackson,L.R., Jacob,L.S., Kelly,S.H., Kube,M., Levy,R., Li,Z.,
+            Liu,B., Liu,J., Liu,W., Lu,J., Maheshwari,M., Nguyen,B.V.,
+            Okwuonu,G.O., Palmeiri,A., Pasternak,S., Perez,L.M., Phelps,K.A.,
+            Plopper,F.J., Qiang,B., Raymond,C., Rodriguez,R.,
+            Saenphimmachak,C., Santibanez,J., Shen,H., Shen,Y., Subramanian,S.,
+            Tabor,P.E., Verduzco,D., Waldron,L., Wang,J., Wang,J., Wang,Q.,
+            Williams,G.A., Wong,G.K., Yao,Z., Zhang,J., Zhang,X., Zhao,G.,
+            Zhou,J., Zhou,Y., Nelson,D., Lehrach,H., Reinhardt,R., Naylor,S.L.,
+            Yang,H., Olson,M., Weinstock,G. and Gibbs,R.A.
+  TITLE     The DNA sequence, annotation and analysis of human chromosome 3
+  JOURNAL   Nature 440 (7088), 1194-1198 (2006)
+   PUBMED   16641997
+REFERENCE   3  (bases 1 to 3216)
+  CONSRTM   International Human Genome Sequencing Consortium
+  TITLE     Finishing the euchromatic sequence of the human genome
+  JOURNAL   Nature 431 (7011), 931-945 (2004)
+   PUBMED   15496913
+REFERENCE   4  (bases 1 to 3216)
+  AUTHORS   Lander,E.S., Linton,L.M., Birren,B., Nusbaum,C., Zody,M.C.,
+            Baldwin,J., Devon,K., Dewar,K., Doyle,M., FitzHugh,W., Funke,R.,
+            Gage,D., Harris,K., Heaford,A., Howland,J., Kann,L., Lehoczky,J.,
+            LeVine,R., McEwan,P., McKernan,K., Meldrim,J., Mesirov,J.P.,
+            Miranda,C., Morris,W., Naylor,J., Raymond,C., Rosetti,M.,
+            Santos,R., Sheridan,A., Sougnez,C., Stange-Thomann,N.,
+            Stojanovic,N., Subramanian,A., Wyman,D., Rogers,J., Sulston,J.,
+            Ainscough,R., Beck,S., Bentley,D., Burton,J., Clee,C., Carter,N.,
+            Coulson,A., Deadman,R., Deloukas,P., Dunham,A., Dunham,I.,
+            Durbin,R., French,L., Grafham,D., Gregory,S., Hubbard,T.,
+            Humphray,S., Hunt,A., Jones,M., Lloyd,C., McMurray,A., Matthews,L.,
+            Mercer,S., Milne,S., Mullikin,J.C., Mungall,A., Plumb,R., Ross,M.,
+            Shownkeen,R., Sims,S., Waterston,R.H., Wilson,R.K., Hillier,L.W.,
+            McPherson,J.D., Marra,M.A., Mardis,E.R., Fulton,L.A.,
+            Chinwalla,A.T., Pepin,K.H., Gish,W.R., Chissoe,S.L., Wendl,M.C.,
+            Delehaunty,K.D., Miner,T.L., Delehaunty,A., Kramer,J.B., Cook,L.L.,
+            Fulton,R.S., Johnson,D.L., Minx,P.J., Clifton,S.W., Hawkins,T.,
+            Branscomb,E., Predki,P., Richardson,P., Wenning,S., Slezak,T.,
+            Doggett,N., Cheng,J.F., Olsen,A., Lucas,S., Elkin,C.,
+            Uberbacher,E., Frazier,M., Gibbs,R.A., Muzny,D.M., Scherer,S.E.,
+            Bouck,J.B., Sodergren,E.J., Worley,K.C., Rives,C.M., Gorrell,J.H.,
+            Metzker,M.L., Naylor,S.L., Kucherlapati,R.S., Nelson,D.L.,
+            Weinstock,G.M., Sakaki,Y., Fujiyama,A., Hattori,M., Yada,T.,
+            Toyoda,A., Itoh,T., Kawagoe,C., Watanabe,H., Totoki,Y., Taylor,T.,
+            Weissenbach,J., Heilig,R., Saurin,W., Artiguenave,F., Brottier,P.,
+            Bruls,T., Pelletier,E., Robert,C., Wincker,P., Smith,D.R.,
+            Doucette-Stamm,L., Rubenfield,M., Weinstock,K., Lee,H.M.,
+            Dubois,J., Rosenthal,A., Platzer,M., Nyakatura,G., Taudien,S.,
+            Rump,A., Yang,H., Yu,J., Wang,J., Huang,G., Gu,J., Hood,L.,
+            Rowen,L., Madan,A., Qin,S., Davis,R.W., Federspiel,N.A.,
+            Abola,A.P., Proctor,M.J., Myers,R.M., Schmutz,J., Dickson,M.,
+            Grimwood,J., Cox,D.R., Olson,M.V., Kaul,R., Raymond,C., Shimizu,N.,
+            Kawasaki,K., Minoshima,S., Evans,G.A., Athanasiou,M., Schultz,R.,
+            Roe,B.A., Chen,F., Pan,H., Ramser,J., Lehrach,H., Reinhardt,R.,
+            McCombie,W.R., de la Bastide,M., Dedhia,N., Blocker,H.,
+            Hornischer,K., Nordsiek,G., Agarwala,R., Aravind,L., Bailey,J.A.,
+            Bateman,A., Batzoglou,S., Birney,E., Bork,P., Brown,D.G.,
+            Burge,C.B., Cerutti,L., Chen,H.C., Church,D., Clamp,M.,
+            Copley,R.R., Doerks,T., Eddy,S.R., Eichler,E.E., Furey,T.S.,
+            Galagan,J., Gilbert,J.G., Harmon,C., Hayashizaki,Y., Haussler,D.,
+            Hermjakob,H., Hokamp,K., Jang,W., Johnson,L.S., Jones,T.A.,
+            Kasif,S., Kaspryzk,A., Kennedy,S., Kent,W.J., Kitts,P.,
+            Koonin,E.V., Korf,I., Kulp,D., Lancet,D., Lowe,T.M., McLysaght,A.,
+            Mikkelsen,T., Moran,J.V., Mulder,N., Pollara,V.J., Ponting,C.P.,
+            Schuler,G., Schultz,J., Slater,G., Smit,A.F., Stupka,E.,
+            Szustakowski,J., Thierry-Mieg,D., Thierry-Mieg,J., Wagner,L.,
+            Wallis,J., Wheeler,R., Williams,A., Wolf,Y.I., Wolfe,K.H.,
+            Yang,S.P., Yeh,R.F., Collins,F., Guyer,M.S., Peterson,J.,
+            Felsenfeld,A., Wetterstrand,K.A., Patrinos,A., Morgan,M.J., de
+            Jong,P., Catanese,J.J., Osoegawa,K., Shizuya,H., Choi,S. and
+            Chen,Y.J.
+  CONSRTM   International Human Genome Sequencing Consortium
+  TITLE     Initial sequencing and analysis of the human genome
+  JOURNAL   Nature 409 (6822), 860-921 (2001)
+   PUBMED   11237011
+  REMARK    Erratum:[Nature 2001 Aug 2;412(6846):565]
+COMMENT     REFSEQ INFORMATION: The reference sequence is identical to
+            CM000665.2.
+            
+            On Feb 3, 2014 this sequence version replaced NC_000003.11.
+            Assembly Name: GRCh38.p14 Primary Assembly
+            The DNA sequence is composed of genomic sequence, primarily
+            finished clones that were sequenced as part of the Human Genome
+            Project. PCR products and WGS shotgun sequence have been added
+            where necessary to fill gaps or correct errors. All such additions
+            are manually curated by GRC staff. For more information see:
+            https://genomereference.org.
+            
+            ##Genome-Annotation-Data-START##
+            Annotation Provider         :: NCBI RefSeq
+            Annotation Status           :: Updated annotation
+            Annotation Name             :: GCF_000001405.40-RS_2025_08
+            Annotation Pipeline         :: NCBI eukaryotic genome annotation
+                                           pipeline
+            Annotation Software Version :: 10.4
+            Annotation Method           :: Best-placed RefSeq; Gnomon;
+                                           RefSeqFE; cmsearch; tRNAscan-SE
+            Features Annotated          :: Gene; mRNA; CDS; ncRNA
+            Annotation Date             :: 08/01/2025
+            ##Genome-Annotation-Data-END##
+FEATURES             Location/Qualifiers
+     source          1..3216
+                     /organism="Homo sapiens"
+                     /mol_type="genomic DNA"
+                     /db_xref="taxon:9606"
+                     /chromosome="3"
+     gene            complement(<1..>3216)
+                     /gene="LOC124906284"
+                     /note="collagen alpha-1(III) chain-like; Derived by
+                     automated computational analysis using gene prediction
+                     method: Gnomon."
+                     /pseudo
+                     /db_xref="GeneID:124906284"
+     gene            1..3216
+                     /gene="TRH"
+                     /gene_synonym="Pro-TRH; TRF"
+                     /note="thyrotropin releasing hormone; Derived by automated
+                     computational analysis using gene prediction method:
+                     BestRefSeq."
+                     /db_xref="GeneID:7200"
+                     /db_xref="HGNC:HGNC:12298"
+                     /db_xref="MIM:613879"
+     mRNA            join(1..104,1090..1308,1980..3216)
+                     /gene="TRH"
+                     /gene_synonym="Pro-TRH; TRF"
+                     /product="thyrotropin releasing hormone"
+                     /note="Derived by automated computational analysis using
+                     gene prediction method: BestRefSeq."
+                     /transcript_id="NM_007117.5"
+                     /db_xref="Ensembl:ENST00000302649.4"
+                     /db_xref="GeneID:7200"
+                     /db_xref="HGNC:HGNC:12298"
+                     /db_xref="MIM:613879"
+     CDS             join(1098..1308,1980..2497)
+                     /gene="TRH"
+                     /gene_synonym="Pro-TRH; TRF"
+                     /note="Derived by automated computational analysis using
+                     gene prediction method: BestRefSeq."
+                     /codon_start=1
+                     /product="thyrotropin releasing hormone preproprotein"
+                     /protein_id="NP_009048.1"
+                     /db_xref="CCDS:CCDS3066.1"
+                     /db_xref="Ensembl:ENSP00000303452.3"
+                     /db_xref="GeneID:7200"
+                     /db_xref="HGNC:HGNC:12298"
+                     /db_xref="MIM:613879"
+                     /translation="MPGPWLLLALALTLNLTGVPGGRAQPEAAQQEAVTAAEHPGLDD
+                     FLRQVERLLFLRENIQRLQGDQGEHSASQIFQSDWLSKRQHPGKREEEEEEGVEEEEE
+                     EEGGAVGPHKRQHPGRREDEASWSVDVTQHKRQHPGRRSPWLAYAVPKRQHPGRRLAD
+                     PKAQRSWEEEEEEEEREEDLMPEKRQHPGKRALGGPCGPQGAYGQAGLLLGLLDDLSR
+                     SQGAEEKRQHPGRRAAWVREPLEE"
+     sig_peptide     1098..1169
+                     /gene="TRH"
+                     /gene_synonym="Pro-TRH; TRF"
+                     /inference="COORDINATES: ab initio prediction:SignalP:6.0"
+     proprotein      join(1170..1308,1980..2494)
+                     /gene="TRH"
+                     /gene_synonym="Pro-TRH; TRF"
+                     /product="prothyrotropin releasing hormone"
+     mat_peptide     2018..2026
+                     /gene="TRH"
+                     /gene_synonym="Pro-TRH; TRF"
+                     /product="thyrotropin releasing hormone"
+     mat_peptide     2108..2116
+                     /gene="TRH"
+                     /gene_synonym="Pro-TRH; TRF"
+                     /product="thyrotropin releasing hormone"
+     mat_peptide     2171..2179
+                     /gene="TRH"
+                     /gene_synonym="Pro-TRH; TRF"
+                     /product="thyrotropin releasing hormone"
+     mat_peptide     2222..2230
+                     /gene="TRH"
+                     /gene_synonym="Pro-TRH; TRF"
+                     /product="thyrotropin releasing hormone"
+     mat_peptide     2324..2332
+                     /gene="TRH"
+                     /gene_synonym="Pro-TRH; TRF"
+                     /product="thyrotropin releasing hormone"
+     mat_peptide     2447..2455
+                     /gene="TRH"
+                     /gene_synonym="Pro-TRH; TRF"
+                     /product="thyrotropin releasing hormone"
+ORIGIN      
+        1 cggcaggcgc ccggggtcct cagcgctgca gactcctgac ctgccgactg cggatcccga
+       61 gtccccggat cccggaccca tcctgtggag cccactcctg gcaggtaacc gccccaaccc
+      121 ctctccttcc gcagacggtg tccgggagca ctggaaaggg agccctctcg gcccgccctc
+      181 accttcggtt ctctgagagc ttcctggaga acagggccgg tgcacaggcg ggcgctgtgc
+      241 tcgcaccccc gggtcctccc cgagcgcagg ccggggaccc gacgggaggc acggcgcggg
+      301 cacatcggag gctctcgctg ctgggcactc aggtcgccag agtccgcagc gcggggtggg
+      361 agctccgcgg caccccctgc ctgggtgccg ccggacagag ctgggtattc agggcgtcgg
+      421 cctgagaacc tgggagttcg aatcccaatc tcaacgctag aaatagaatt ttagcgttga
+      481 agttaggatt ttagcgttag aatcagattc ctggcttagt catgaaagct tagcattaga
+      541 aatagaatct tagctttgca aatagacttt gagctttaga acctgaatct tagcgataga
+      601 aatgggatct tcgcgttgga atgaggacgt cggccacgga gcttggagtt agaacgtggc
+      661 gatggggacc tttgggggag tcttggcggg gacgcaaccg ttagcgtcgc ggctgtgcct
+      721 ggcgctgcaa tctcaatggt tgcactcccg gcgaggcagt cccagcgttg gcttccccag
+      781 ttccgcgtca cattgaaggg tggcggtggc gctggcgatg gggttcctac ggcctcctgc
+      841 cttgcgcaag cagaactggg cgcaggcact acaggcaccc gtgggggcga ggacgcctag
+      901 aggtgacagg tgtggacgca gagccggggc gaacccgccg ctgctcccgc ccctgcacga
+      961 ggggcagtgg tcctgcttct gggagggcgg ttgaactgtg cgtggtttgt ttctggcggg
+     1021 cgtcggggga gatggagcgg gatgtgctgt gattcggtgc gctcaggctc cctctgtccc
+     1081 ctaacccaga cgccgcgatg cccggccctt ggttgctgct cgctctggct ttgaccctga
+     1141 acctgaccgg tgtccccggc ggccgtgctc agccagaggc ggcccagcag gaggcagtga
+     1201 cggccgcgga gcatccgggc ctggatgact tcctgcgcca ggtggagcgc ctcctcttcc
+     1261 tccgggaaaa catccagcgg ctgcaagggg accagggtga gcactccggt gagtggatgg
+     1321 ggctgttggg ggctgtgggg ctaggctatt gggagagccg tggaaacctg ccggcaaagg
+     1381 ggaggggagg cttggtcagc tagccttctg cctttcggaa gctcagaaac cctccctggc
+     1441 tgcgcctagg cgggatctgg agttgaccat tcctcggggt cagattcctc ccctgtctca
+     1501 atgctgggaa tatttcacag agagcaggcc ctgggtgggg aagcttctgt gtgctaggga
+     1561 gagagtttct ttgtgtgtga cagtttgaat tactactgtc taggcacttc tgtgccagac
+     1621 actattccaa gcacttcaaa caccttatca cactgtttga tcttcctaac aacctcttag
+     1681 ttaggtactg ttattacgat tttacacaga agaaaactga ggctcccaga gatcaattga
+     1741 gtcgcttatg gtcagacaac tagggagcgc cagagctggg attggaaccc agaggcaatg
+     1801 cctttgacta ttgtgtgaat gtgtgtatct gtgaggcctg aggggcaggt gcaagaccat
+     1861 gcctctgagt gggagctgca ggaaatgtac cctgcctggg agaaaagcag gagtgggcac
+     1921 tcaggcgcct gcctattaca tgggtcaggg gcccctcact gacctctttc cttccccagc
+     1981 gtcccagatc tttcaatctg actggctctc caaacgtcag catccaggca aaagagagga
+     2041 ggaggaggaa gagggagttg aagaagagga agaggaagaa gggggggctg tgggacccca
+     2101 caaacggcag caccctggcc gacgagaaga tgaggcttca tggtcagtcg atgtaaccca
+     2161 gcacaagcgg cagcatcctg gccggcgctc cccctggctt gcatatgctg tcccgaagcg
+     2221 gcagcaccca ggcagaaggc tggcagatcc caaggctcaa aggagctggg aagaagagga
+     2281 ggaggaggaa gagagagagg aagacctgat gcctgaaaaa cgccagcatc cgggcaagag
+     2341 ggccctggga ggcccctgtg ggccccaggg agcctatggt caagcgggcc ttctgctggg
+     2401 gctcctggat gacctgagta ggagccaggg agctgaggaa aagcggcagc accctggtcg
+     2461 gcgggcagcc tgggtcagag agcccctgga ggagtgaacc cagttttccc tgaagtcgag
+     2521 tttgtggtct aaggatgtct tgagccctgt gtgccccacc attcatgacc tctgtattct
+     2581 ctagttagat ccctgaccat aagcctgagc ccctccctcc cagccccata ttcacacaca
+     2641 tcccagcccc tggccttgcc ctcttccttt aggcatgtga gaaaatcagc ctagcagttt
+     2701 aaaccccact ttcctccact tagcaccata ggcaaggggg cagatcccag agcccctctc
+     2761 acccccccca ccacaggcct gctccttcct tagccttggc taagatggtc cttctgtgtc
+     2821 ttgcaaagac tccccaagtg ggacagggag cccctgggag ggcagccagt gagggtgggg
+     2881 tgggactgaa gcgttgtgtg caaatccagc ttccatcccc tccccaacct ggcaggattc
+     2941 tccatgtgta aacttcaccc ccaggaccca ggatcttctc ctttctgggc atccctttgt
+     3001 gggtgggcag agccctgacc cacagctgtg ttactgcttg gagaagcata tgtaggggca
+     3061 taccctgtgg tgttgtgctg tgtctggctg tgggataaat gtgtgtggga atattgaaac
+     3121 atcgcctagg aattgtggtt tgtatataac cctctaagcc cctatccctt gtcgatgaca
+     3181 gtcatcctaa tgataataaa acctgcatcc agataa
+//
+

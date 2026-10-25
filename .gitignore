@@ -21,7 +21,13 @@ Thumbs.db
 # Vector maps are tracked on purpose: they are plain-text GenBank built by
 # tools/build_vector_maps.py, and the test suite designs into them.
 
-# A uv lock file turns up here because the parent project uses uv. It is
-# not tracked: clonewright has no dependencies to lock, and a 500-line
-# lock file pinning the optional `agent` extra misrepresents that.
+# Local tooling writes files into the working directory that are not part
+# of the package. Two have already turned up in a `git add -A`: a uv lock
+# file (clonewright has no dependencies to lock, and a 500-line lock
+# pinning the optional `agent` extra misrepresents that) and PyCharm's MCP
+# server config, which points at a port on this machine.
 uv.lock
+.mcp.json
+.claude/
+.cursor/
+.aider*

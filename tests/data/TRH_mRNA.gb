@@ -1,0 +1,256 @@
+LOCUS       NM_007117               1560 bp    mRNA    linear   PRI 20-NOV-2025
+DEFINITION  Homo sapiens thyrotropin releasing hormone (TRH), mRNA.
+ACCESSION   NM_007117
+VERSION     NM_007117.5
+KEYWORDS    RefSeq; MANE Select.
+SOURCE      Homo sapiens (human)
+  ORGANISM  Homo sapiens
+            Eukaryota; Metazoa; Chordata; Craniata; Vertebrata; Euteleostomi;
+            Mammalia; Eutheria; Euarchontoglires; Primates; Haplorrhini;
+            Catarrhini; Hominidae; Homo.
+REFERENCE   1  (bases 1 to 1560)
+  AUTHORS   Gao,Y., Zhou,J.F., Mao,J.Y., Jiang,L. and Li,X.P.
+  TITLE     Identification of the Thyrotropin-Releasing Hormone (TRH) as a
+            Novel Biomarker in the Prognosis for Acute Myeloid Leukemia
+  JOURNAL   Biomolecules 12 (10), 1359 (2022)
+   PUBMED   36291567
+  REMARK    GeneRIF: Identification of the Thyrotropin-Releasing Hormone (TRH)
+            as a Novel Biomarker in the Prognosis for Acute Myeloid Leukemia.
+REFERENCE   2  (bases 1 to 1560)
+  AUTHORS   Duan,J., Xu,P., Luan,X., Ji,Y., He,X., Song,N., Yuan,Q., Jin,Y.,
+            Cheng,X., Jiang,H., Zheng,J., Zhang,S., Jiang,Y. and Xu,H.E.
+  TITLE     Hormone- and antibody-mediated activation of the thyrotropin
+            receptor
+  JOURNAL   Nature 609 (7928), 854-859 (2022)
+   PUBMED   35940204
+REFERENCE   3  (bases 1 to 1560)
+  AUTHORS   Kent,N.L., Young,S.L., Akison,L.K. and Cuffe,J.S.M.
+  TITLE     Is the link between elevated TSH and gestational diabetes mellitus
+            dependant on diagnostic criteria and thyroid antibody status: a
+            systematic review and meta-analysis
+  JOURNAL   Endocrine 74 (1), 38-49 (2021)
+   PUBMED   33991314
+  REMARK    GeneRIF: Is the link between elevated TSH and gestational diabetes
+            mellitus dependant on diagnostic criteria and thyroid antibody
+            status: a systematic review and meta-analysis.
+REFERENCE   4  (bases 1 to 1560)
+  AUTHORS   Luck,K., Kim,D.K., Lambourne,L., Spirohn,K., Begg,B.E., Bian,W.,
+            Brignall,R., Cafarelli,T., Campos-Laborie,F.J., Charloteaux,B.,
+            Choi,D., Cote,A.G., Daley,M., Deimling,S., Desbuleux,A., Dricot,A.,
+            Gebbia,M., Hardy,M.F., Kishore,N., Knapp,J.J., Kovacs,I.A.,
+            Lemmens,I., Mee,M.W., Mellor,J.C., Pollis,C., Pons,C.,
+            Richardson,A.D., Schlabach,S., Teeking,B., Yadav,A., Babor,M.,
+            Balcha,D., Basha,O., Bowman-Colin,C., Chin,S.F., Choi,S.G.,
+            Colabella,C., Coppin,G., D'Amata,C., De Ridder,D., De Rouck,S.,
+            Duran-Frigola,M., Ennajdaoui,H., Goebels,F., Goehring,L., Gopal,A.,
+            Haddad,G., Hatchi,E., Helmy,M., Jacob,Y., Kassa,Y., Landini,S.,
+            Li,R., van Lieshout,N., MacWilliams,A., Markey,D., Paulson,J.N.,
+            Rangarajan,S., Rasla,J., Rayhan,A., Rolland,T., San-Miguel,A.,
+            Shen,Y., Sheykhkarimli,D., Sheynkman,G.M., Simonovsky,E., Tasan,M.,
+            Tejeda,A., Tropepe,V., Twizere,J.C., Wang,Y., Weatheritt,R.J.,
+            Weile,J., Xia,Y., Yang,X., Yeger-Lotem,E., Zhong,Q., Aloy,P.,
+            Bader,G.D., De Las Rivas,J., Gaudet,S., Hao,T., Rak,J.,
+            Tavernier,J., Hill,D.E., Vidal,M., Roth,F.P. and Calderwood,M.A.
+  TITLE     A reference map of the human binary protein interactome
+  JOURNAL   Nature 580 (7803), 402-408 (2020)
+   PUBMED   32296183
+REFERENCE   5  (bases 1 to 1560)
+  AUTHORS   Puttipanyalears,C., Arayataweegool,A., Chalertpet,K.,
+            Rattanachayoto,P., Mahattanasakul,P., Tangjaturonsasme,N.,
+            Kerekhanjanarong,V., Mutirangura,A. and Kitkumthorn,N.
+  TITLE     TRH site-specific methylation in oral and oropharyngeal squamous
+            cell carcinoma
+  JOURNAL   BMC Cancer 18 (1), 786 (2018)
+   PUBMED   30081853
+  REMARK    GeneRIF: cg01009664 of TRH as a potential biomarker for oral
+            squamous cell carcinoma and oropharyngeal squamous cell carcinoma.
+REFERENCE   6  (bases 1 to 1560)
+  AUTHORS   Nillni,E.A.
+  TITLE     Regulation of the hypothalamic thyrotropin releasing hormone (TRH)
+            neuron by neuronal and peripheral inputs
+  JOURNAL   Front Neuroendocrinol 31 (2), 134-156 (2010)
+   PUBMED   20074584
+  REMARK    Review article
+REFERENCE   7  (bases 1 to 1560)
+  AUTHORS   Yamada,M., Iwasaki,T., Satoh,T., Monden,T., Konaka,S., Murakami,M.,
+            Iriuchijima,T. and Mori,M.
+  TITLE     Activation of the thyrotropin-releasing hormone (TRH) receptor by a
+            direct precursor of TRH, TRH-Gly
+  JOURNAL   Neurosci Lett 196 (1-2), 109-112 (1995)
+   PUBMED   7501234
+REFERENCE   8  (bases 1 to 1560)
+  AUTHORS   Pekary,A.E., Gwirtsman,H., Tourtellotte,W.W., Smith,V.P. and
+            Hershman,J.M.
+  TITLE     High levels of thyrotropin-releasing hormone precursor peptide
+            immunoreactivity and binding substance occur in human cerebrospinal
+            fluid
+  JOURNAL   Neuroendocrinology 53 (3), 246-252 (1991)
+   PUBMED   1904138
+REFERENCE   9  (bases 1 to 1560)
+  AUTHORS   Yamada,M., Wondisford,F.E., Radovick,S., Nakayama,Y.,
+            Weintraub,B.D. and Wilber,J.F.
+  TITLE     Assignment of human preprothyrotropin-releasing hormone (TRH) gene
+            to chromosome 3
+  JOURNAL   Somat Cell Mol Genet 17 (1), 97-100 (1991)
+   PUBMED   1900134
+REFERENCE   10 (bases 1 to 1560)
+  AUTHORS   Yamada,M., Radovick,S., Wondisford,F.E., Nakayama,Y.,
+            Weintraub,B.D. and Wilber,J.F.
+  TITLE     Cloning and structure of human genomic DNA and hypothalamic cDNA
+            encoding human prepro thyrotropin-releasing hormone
+  JOURNAL   Mol Endocrinol 4 (4), 551-556 (1990)
+   PUBMED   2126343
+COMMENT     REVIEWED REFSEQ: This record has been curated by NCBI staff. The
+            reference sequence was derived from AK313473.1 and AC083906.23.
+            This sequence is a reference standard in the RefSeqGene project.
+            
+            On Nov 22, 2018 this sequence version replaced NM_007117.4.
+            
+            Summary: This gene encodes a member of the thyrotropin-releasing
+            hormone family. Cleavage of the encoded proprotein releases mature
+            thyrotropin-releasing hormone, which is a tripeptide hypothalamic
+            regulatory hormone. The human proprotein contains six
+            thyrotropin-releasing hormone tripeptides. Thyrotropin-releasing
+            hormone is involved in the regulation and release of
+            thyroid-stimulating hormone, as well as prolactin. Deficiency of
+            this hormone has been associated with hypothalamic hypothyroidism.
+            [provided by RefSeq, May 2013].
+            
+            Sequence Note: This RefSeq record was created from transcript and
+            genomic sequence data to make the sequence consistent with the
+            reference genome assembly. The genomic coordinates used for the
+            transcript record were based on transcript alignments.
+            
+            Publication Note:  This RefSeq record includes a subset of the
+            publications that are available for this gene. Please see the Gene
+            record to access additional publications.
+            
+            ##Evidence-Data-START##
+            Transcript exon combination :: BC110515.2, AK313473.1 [ECO:0000332]
+            RNAseq introns              :: single sample supports all introns
+                                           SAMEA1968189, SAMEA2145245
+                                           [ECO:0000348]
+            ##Evidence-Data-END##
+            
+            ##RefSeq-Attributes-START##
+            MANE Ensembl match     :: ENST00000302649.4/ ENSP00000303452.3
+            RefSeq Select criteria :: based on single protein-coding transcript
+            ##RefSeq-Attributes-END##
+            COMPLETENESS: full length.
+PRIMARY     REFSEQ_SPAN         PRIMARY_IDENTIFIER PRIMARY_SPAN        COMP
+            1-735               AK313473.1         54-788
+            736-1560            AC083906.23        130564-131388       c
+FEATURES             Location/Qualifiers
+     source          1..1560
+                     /organism="Homo sapiens"
+                     /mol_type="mRNA"
+                     /db_xref="taxon:9606"
+                     /chromosome="3"
+                     /map="3q22.1"
+     gene            1..1560
+                     /gene="TRH"
+                     /gene_synonym="Pro-TRH; TRF"
+                     /note="thyrotropin releasing hormone"
+                     /db_xref="GeneID:7200"
+                     /db_xref="HGNC:HGNC:12298"
+                     /db_xref="MIM:613879"
+     exon            1..104
+                     /gene="TRH"
+                     /gene_synonym="Pro-TRH; TRF"
+                     /inference="alignment:Splign:2.1.0"
+     exon            105..323
+                     /gene="TRH"
+                     /gene_synonym="Pro-TRH; TRF"
+                     /inference="alignment:Splign:2.1.0"
+     CDS             113..841
+                     /gene="TRH"
+                     /gene_synonym="Pro-TRH; TRF"
+                     /note="prothyroliberin; protirelin; TSH-releasing factor;
+                     thyrotropin-releasing factor; pro-thyrotropin-releasing
+                     hormone"
+                     /codon_start=1
+                     /product="thyrotropin releasing hormone preproprotein"
+                     /protein_id="NP_009048.1"
+                     /db_xref="CCDS:CCDS3066.1"
+                     /db_xref="GeneID:7200"
+                     /db_xref="HGNC:HGNC:12298"
+                     /db_xref="MIM:613879"
+                     /translation="MPGPWLLLALALTLNLTGVPGGRAQPEAAQQEAVTAAEHPGLDD
+                     FLRQVERLLFLRENIQRLQGDQGEHSASQIFQSDWLSKRQHPGKREEEEEEGVEEEEE
+                     EEGGAVGPHKRQHPGRREDEASWSVDVTQHKRQHPGRRSPWLAYAVPKRQHPGRRLAD
+                     PKAQRSWEEEEEEEEREEDLMPEKRQHPGKRALGGPCGPQGAYGQAGLLLGLLDDLSR
+                     SQGAEEKRQHPGRRAAWVREPLEE"
+     sig_peptide     113..184
+                     /gene="TRH"
+                     /gene_synonym="Pro-TRH; TRF"
+                     /inference="COORDINATES: ab initio prediction:SignalP:6.0"
+     proprotein      185..838
+                     /gene="TRH"
+                     /gene_synonym="Pro-TRH; TRF"
+                     /product="prothyrotropin releasing hormone"
+     mat_peptide     362..370
+                     /gene="TRH"
+                     /gene_synonym="Pro-TRH; TRF"
+                     /product="thyrotropin releasing hormone"
+     mat_peptide     452..460
+                     /gene="TRH"
+                     /gene_synonym="Pro-TRH; TRF"
+                     /product="thyrotropin releasing hormone"
+     mat_peptide     515..523
+                     /gene="TRH"
+                     /gene_synonym="Pro-TRH; TRF"
+                     /product="thyrotropin releasing hormone"
+     mat_peptide     566..574
+                     /gene="TRH"
+                     /gene_synonym="Pro-TRH; TRF"
+                     /product="thyrotropin releasing hormone"
+     mat_peptide     668..676
+                     /gene="TRH"
+                     /gene_synonym="Pro-TRH; TRF"
+                     /product="thyrotropin releasing hormone"
+     mat_peptide     791..799
+                     /gene="TRH"
+                     /gene_synonym="Pro-TRH; TRF"
+                     /product="thyrotropin releasing hormone"
+     exon            324..1560
+                     /gene="TRH"
+                     /gene_synonym="Pro-TRH; TRF"
+                     /inference="alignment:Splign:2.1.0"
+     regulatory      1539..1544
+                     /regulatory_class="polyA_signal_sequence"
+                     /gene="TRH"
+                     /gene_synonym="Pro-TRH; TRF"
+                     /note="hexamer: AATAAA"
+     polyA_site      1560
+                     /gene="TRH"
+                     /gene_synonym="Pro-TRH; TRF"
+                     /note="major polyA site"
+ORIGIN      
+        1 cggcaggcgc ccggggtcct cagcgctgca gactcctgac ctgccgactg cggatcccga
+       61 gtccccggat cccggaccca tcctgtggag cccactcctg gcagacgccg cgatgcccgg
+      121 cccttggttg ctgctcgctc tggctttgac cctgaacctg accggtgtcc ccggcggccg
+      181 tgctcagcca gaggcggccc agcaggaggc agtgacggcc gcggagcatc cgggcctgga
+      241 tgacttcctg cgccaggtgg agcgcctcct cttcctccgg gaaaacatcc agcggctgca
+      301 aggggaccag ggtgagcact ccgcgtccca gatctttcaa tctgactggc tctccaaacg
+      361 tcagcatcca ggcaaaagag aggaggagga ggaagaggga gttgaagaag aggaagagga
+      421 agaagggggg gctgtgggac cccacaaacg gcagcaccct ggccgacgag aagatgaggc
+      481 ttcatggtca gtcgatgtaa cccagcacaa gcggcagcat cctggccggc gctccccctg
+      541 gcttgcatat gctgtcccga agcggcagca cccaggcaga aggctggcag atcccaaggc
+      601 tcaaaggagc tgggaagaag aggaggagga ggaagagaga gaggaagacc tgatgcctga
+      661 aaaacgccag catccgggca agagggccct gggaggcccc tgtgggcccc agggagccta
+      721 tggtcaagcg ggccttctgc tggggctcct ggatgacctg agtaggagcc agggagctga
+      781 ggaaaagcgg cagcaccctg gtcggcgggc agcctgggtc agagagcccc tggaggagtg
+      841 aacccagttt tccctgaagt cgagtttgtg gtctaaggat gtcttgagcc ctgtgtgccc
+      901 caccattcat gacctctgta ttctctagtt agatccctga ccataagcct gagcccctcc
+      961 ctcccagccc catattcaca cacatcccag cccctggcct tgccctcttc ctttaggcat
+     1021 gtgagaaaat cagcctagca gtttaaaccc cactttcctc cacttagcac cataggcaag
+     1081 ggggcagatc ccagagcccc tctcaccccc cccaccacag gcctgctcct tccttagcct
+     1141 tggctaagat ggtccttctg tgtcttgcaa agactcccca agtgggacag ggagcccctg
+     1201 ggagggcagc cagtgagggt ggggtgggac tgaagcgttg tgtgcaaatc cagcttccat
+     1261 cccctcccca acctggcagg attctccatg tgtaaacttc acccccagga cccaggatct
+     1321 tctcctttct gggcatccct ttgtgggtgg gcagagccct gacccacagc tgtgttactg
+     1381 cttggagaag catatgtagg ggcataccct gtggtgttgt gctgtgtctg gctgtgggat
+     1441 aaatgtgtgt gggaatattg aaacatcgcc taggaattgt ggtttgtata taaccctcta
+     1501 agcccctatc ccttgtcgat gacagtcatc ctaatgataa taaaacctgc atccagataa
+//
+

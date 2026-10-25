@@ -1330,6 +1330,30 @@ def design(insert: Record, vector: Record, opts: Options | None = None) -> Desig
         )
 
     seq = insert.seq
+
+    # An insert has to be long enough to carry two annealing regions that
+    # do not overlap each other, or there is nothing to prime on.
+    #
+    # Checked here, and as a refusal, because the alternative is what used
+    # to happen: `_pick_matched` found no candidate pair and raised a bare
+    # `ValueError`, which is not one of the exceptions `design` declares,
+    # so it travelled through the session and out of the command line as a
+    # traceback. A gene too short to clone is an ordinary answer -- an
+    # NCBI region whose only coding sequence is a short peptide reaches
+    # this honestly -- and every other such answer in this package is a
+    # refusal carrying its reason.
+    needed = 2 * opts.anneal_min
+    if len(seq) < needed:
+        issues.append(Issue(
+            "error",
+            f"{insert.name} is {len(seq)} bp, and two non-overlapping "
+            f"annealing regions of at least {opts.anneal_min} nt need "
+            f"{needed} bp. A sequence this short is made as a pair of "
+            f"synthesised oligonucleotides and annealed into the cut "
+            f"vector, rather than amplified",
+        ))
+        raise DesignFailed(issues)
+
     issues.extend(_check_orf(seq, opts.mode))
 
     if opts.five_enzyme and opts.three_enzyme:

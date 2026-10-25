@@ -28,6 +28,7 @@ from typing import Callable, Protocol as _Protocol
 
 from . import design as design_mod
 from . import expression as expression_mod
+from . import ncbi
 from . import pcr
 from . import report
 from . import strains as strains_mod
@@ -52,6 +53,13 @@ class Request:
     # What to call the gene, when `insert` is a pasted sequence rather than
     # a file with a name in it. Empty leaves whatever the loader found.
     insert_name: str = ""
+    # Which coding sequence to take, when `insert` is an NCBI link to a
+    # region holding more than one gene. Empty takes the longest and says
+    # which others were there.
+    cds_gene: str = ""
+    # Whether a link may be fetched. Off, only the local cache is read,
+    # which is what makes a cached design reproducible offline.
+    allow_network: bool = True
     # Empty means "choose one", which is answered by designing into every
     # bundled vector rather than by preference.
     vector: str = ""
@@ -81,6 +89,7 @@ class Outcome:
     refusal: str = ""
     design: object | None = None
     view: object | None = None
+    fetched: object | None = None
     plan: object | None = None
     spec: object | None = None
     candidates: tuple = ()
@@ -215,10 +224,39 @@ class Orchestrator:
         request = self.planner.route(request)
         out = Outcome(request=request, trace=s.trace)
 
-        # `load_sequence` rather than `load`, because a gene does not
-        # always arrive as a file: the interactive session lets you paste
-        # the sequence, and a path-only loader refused it.
-        insert = s.call("seqio.load_sequence", value=request.insert)
+        # Three ways a gene can arrive, and the first one is not local.
+        if ncbi.looks_like_a_target(request.insert):
+            try:
+                resolved = s.call(
+                    "ncbi.resolve",
+                    value=request.insert,
+                    gene=request.cds_gene,
+                    allow_network=request.allow_network,
+                )
+            except ncbi.FetchError as exc:
+                out.refused = True
+                out.refusal = str(exc)
+                out.blocks.append(_refusal_block(exc, "fetch"))
+                out.answer = assemble(s, out.blocks, self._narrate(out))
+                return out
+            out.fetched = resolved
+            out.blocks.append(s.call("report.render_fetch",
+                                     resolved=resolved))
+            if resolved.record is None:
+                # The sequence failed its own checks -- a partial CDS, a
+                # splice that does not translate to the annotated protein,
+                # a region with no gene in it. Designing against it would
+                # produce primers for the wrong molecule.
+                out.refused = True
+                out.refusal = "; ".join(i.text for i in resolved.errors)
+                out.answer = assemble(s, out.blocks, self._narrate(out))
+                return out
+            insert = resolved.record
+        else:
+            # `load_sequence` rather than `load`, because a gene does not
+            # always arrive as a file: the interactive session lets you
+            # paste the sequence, and a path-only loader refused it.
+            insert = s.call("seqio.load_sequence", value=request.insert)
         if request.insert_name:
             # A pasted sequence has no name of its own, and the name ends
             # up on the primers -- `<literal>_F` is not something to put

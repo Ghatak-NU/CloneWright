@@ -3,14 +3,16 @@
 Designs restriction-cloning primers for expressing a gene in *E. coli*, and
 checks them against both molecules instead of assuming they work.
 
-Give it a coding sequence. It reads the vector, picks an enzyme pair that
-cuts the backbone once each and never cuts your gene, matches the two
+Give it a coding sequence — a file, a pasted sequence, or an NCBI link to
+the record you are looking at. It reads the vector, picks an enzyme pair
+that cuts the backbone once each and never cuts your gene, matches the two
 annealing temperatures to each other, carries the reading frame through to
 the finished construct, translates the protein the construct actually
 encodes, and designs the primers that prove the clone is real.
 
 Pure Python 3, standard library only. No conda environment, no BLAST
-install, no network.
+install, nothing to compile. The only thing that ever touches the network
+is fetching a record you asked for by link, and that gets cached.
 
 ```bash
 pip install git+https://github.com/Ghatak-NU/clonewright
@@ -53,6 +55,75 @@ warning or a refusal.
 
 ---
 
+## Give it an NCBI link
+
+Paste the address of the record you are looking at, and it fetches that
+exact region, finds the gene in it and splices the coding sequence
+together:
+
+```bash
+clonewright design "https://www.ncbi.nlm.nih.gov/nuccore/NC_000003.12?report=genbank&from=129974720&to=129977935"
+```
+
+```
+-- fetched from NCBI -----------------------------------------------------
+  record         NC_000003.12
+  definition     Homo sapiens chromosome 3, GRCh38.p14 Primary Assembly
+  organism       Homo sapiens
+  region         129974720-129977935 (3216 bp retrieved)
+  provenance     live fetch, now cached
+
+  coding sequences annotated in it:
+   -> TRH (729 bp, 2 exons, +)
+
+  gene           TRH
+  product        thyrotropin releasing hormone preproprotein
+  protein        NP_009048.1
+  exons          1098-1308, 1980-2497  (forward strand)
+  coding length  729 bp
+
+   note  spliced 2 exons into 729 bp, leaving out 671 bp of intron. E. coli
+         cannot splice, so this is the sequence to clone -- and it is not the
+         sequence you get by amplifying the region from genomic DNA. The
+         template has to be cDNA or a synthetic construct
+   note  the splice is confirmed: translating it gives the 242 residue protein
+         NCBI annotates for NP_009048.1, residue for residue
+```
+
+**The splicing is the whole job, and it is the part that goes wrong
+silently.** That region carries the human TRH gene, whose CDS is annotated
+`join(1098..1308,1980..2497)` — two exons with 671 bases of intron between
+them. Take the outer bounds instead, which is what a naive read of the
+location gives you, and you get 1,400 bp that is not a multiple of three
+and encodes nothing. It would still amplify, still ligate, still give
+colonies.
+
+So the splice is **checked against NCBI's own answer**. A CDS feature
+carries a `/translation`: the protein NCBI says that coding sequence makes.
+clonewright splices the DNA itself, translates it, and compares residue by
+residue. Agreement means the exon boundaries, the strand and the reading
+frame were all handled correctly. Disagreement returns nothing — a primer
+pair built on a wrong splice is worse than none, because it works.
+
+Three things it refuses rather than papers over:
+
+- **A CDS the region cuts in half.** GenBank writes that as `18..>228`. If
+  the `from`/`to` in your URL does not cover the whole gene you are told
+  so, and told to widen it or link the mRNA instead.
+- **A region with no coding sequence.** A promoter, an intron, an lncRNA:
+  there is nothing to clone for expression.
+- **A pseudogene**, which is annotated as one and does not make a protein.
+
+An accession works as well as a URL (`clonewright design NM_007117.5`), and
+an mRNA record gets its CDS cut out of the UTRs — the first base of an mRNA
+is not a start codon. Both routes to TRH give the same 729 bp.
+
+Every fetch is cached as the GenBank text it came from, so a design
+repeated months later gets the same sequence and a revised database cannot
+quietly change a construct. `--offline` reads the cache and never touches
+the network. If a region holds more than one gene, `--cds TRH` says which,
+and the interactive session lists them and asks.
+
 ## The session
 
 ```
@@ -62,7 +133,8 @@ clonewright 0.1.0
 restriction-cloning primers for expression in E. coli
 
 Which gene are you cloning?
-a file path (FASTA, GenBank, SnapGene .dna), or paste the sequence
+a file path (FASTA, GenBank, SnapGene .dna), an NCBI link or
+accession, or paste the sequence
 > examples/SOD1.fasta
   read SOD1, 465 bp, ATG...TAA
   it reads cleanly from a start codon to a stop, in frame.
@@ -418,7 +490,7 @@ python -m clonewright annotate unannotated.fa -o annotated.gb
 |---|---|
 | *(none)* | Asks for what it needs, one question at a time |
 | `interactive` | The same session, explicitly — works through a pipe too |
-| `design GENE [--vector V]` | The whole pipeline. Omit `--vector` and it chooses |
+| `design GENE [--vector V]` | The whole pipeline. `GENE` may be a file, a sequence, an NCBI link or an accession. Omit `--vector` and it chooses |
 | `compare GENE` | Every bundled vector, ranked by designing into each |
 | `ask "sentence"` | Reads the request out of a sentence, then runs it |
 | `annotate VECTOR` | Derives a bacterial cassette from sequence |
@@ -426,7 +498,9 @@ python -m clonewright annotate unannotated.fa -o annotated.gb
 | `tools` | The tool registry the agent drives |
 
 Useful flags on `design`: `--origin human` (turns on the intron and
-rare-codon checks), `--mode`, `--expression-strain`, `--no-verify`,
+rare-codon checks), `--cds GENE` (which coding sequence, when an NCBI
+region holds several), `--offline` (cache only, never the network),
+`--mode`, `--expression-strain`, `--no-verify`,
 `--compare`, `--json`, and `--emit-construct out.gb`, which writes the
 finished plasmid as GenBank with the features that survived the ligation —
 openable in SnapGene or Benchling.
@@ -469,12 +543,15 @@ python -m clonewright design examples/SOD1.fasta --vector pET-28a
 python -m unittest discover -s tests
 ```
 
-145 tests, no network, under a minute. They cover the published
+196 tests, no network, under a minute. They cover the published
 thermodynamic values, the GenBank round trip, cassette derivation on all
 four bundled maps, the enzyme geometry, the frame and product arithmetic
 (including that pET-28a leader), the strain checks, the three invariants,
-the CLI's exit codes, and the interactive session — which is driven from a
-list of answers, because input and output are injected rather than called.
+the CLI's exit codes, the NCBI fetch and splice (against saved records, so
+they run offline — including one test that moves an exon boundary by a
+single base and checks the cross-check catches it), and the interactive
+session, which is driven from a list of answers because input and output
+are injected rather than called.
 Developed on Python 3.14; the code is standard library only and uses
 nothing newer than 3.10 syntax.
 
@@ -494,6 +571,10 @@ time than one that does less:
   and point at a strain; the sequence is never rewritten.
 - **Four bundled vectors.** Any other vector works as a map file, but only
   these four come with their catalog facts.
+- **The NCBI fetch trusts NCBI's annotation.** It splices the CDS the
+  database annotates and proves the splice against the database's own
+  protein; it does not decide whether that annotation is the isoform you
+  want. For a gene with several transcripts, link the one you mean.
 - **It does not know your bench.** Enzyme buffers and incubation
   temperatures are transcribed from vendor tables, printed rather than only
   acted on, and worth checking against the tubes in your freezer.

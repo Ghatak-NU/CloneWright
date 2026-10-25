@@ -32,6 +32,7 @@ from typing import Callable
 from . import __version__
 from . import construct as construct_mod
 from . import design as design_mod
+from . import ncbi
 from . import orchestrate
 from . import seqio
 from . import source as source_mod
@@ -125,26 +126,82 @@ OWN_MAP = "a vector map of my own (a file path)"
 LET_IT_CHOOSE = "design into all of them and pick the best for this gene"
 
 
-def ask_for_gene(console: Console) -> tuple[str, seqio.Record]:
-    """The gene, as something `seqio` could read, and what it read.
+def fetch_from_ncbi(console: Console, answer: str) -> tuple[seqio.Record, str]:
+    """Fetch a link, and settle which coding sequence was meant.
 
-    Returns the answer as given *and* the parsed record: the pipeline
-    wants the string, and the person wants to be told what was understood
-    before four more questions go by.
+    The choice is made here rather than left to the pipeline, because when
+    a region holds two genes the person looking at the page knows which one
+    they linked and the longest-wins rule is a guess. The pipeline then
+    re-resolves from the cache with the answer, so the fetch happens once.
     """
-    hint = "a file path (FASTA, GenBank, SnapGene .dna), or paste the sequence"
+    console.write("  fetching from NCBI...")
+    target = ncbi.parse_target(answer)
+    text, from_cache = ncbi.fetch(target)
+    fetched = ncbi.parse_record(text, from_cache=from_cache)
+    console.write(
+        f"  {target.describe()}: {fetched.definition or fetched.accession}"
+        f", {len(fetched)} bp"
+        + (" (from the cache)" if from_cache else "")
+    )
+
+    usable = [c for c in fetched.coding if not c.pseudo]
+    gene = ""
+    if len(usable) > 1:
+        picked = console.choose(
+            f"  That region holds {len(usable)} coding sequences. Which one?",
+            [c.label() + (f" -- {c.product}" if c.product else "")
+             for c in usable],
+            default=1 + max(
+                range(len(usable)), key=lambda i: usable[i].length
+            ),
+        )
+        gene = usable[picked - 1].gene or usable[picked - 1].protein_id
+
+    resolved = ncbi.resolve(answer, gene=gene)
+    for issue in resolved.issues:
+        if issue.level != "note" or "splice is confirmed" in issue.text:
+            console.write(f"  [{issue.level}] {issue.text}")
+    if resolved.record is None:
+        raise ncbi.FetchError(
+            "; ".join(i.text for i in resolved.errors)
+            or "nothing usable came back"
+        )
+    return resolved.record, gene
+
+
+def ask_for_gene(console: Console) -> tuple[str, seqio.Record, str]:
+    """The gene, as something the pipeline can take, and what was read.
+
+    Returns the answer as given, the parsed record, and which coding
+    sequence was chosen if the answer was an NCBI link: the pipeline wants
+    the first and the third, and the person wants to be told what was
+    understood before four more questions go by.
+    """
+    hint = (
+        "a file path (FASTA, GenBank, SnapGene .dna), an NCBI link or\n"
+        "accession, or paste the sequence"
+    )
     if Path("examples").is_dir():
         hint += "\n(there are sequences in examples/ to try)"
     while True:
         answer = console.ask(f"Which gene are you cloning?\n{hint}")
         if not answer:
-            console.write("  nothing to clone yet -- a path or a sequence.")
+            console.write("  nothing to clone yet -- a path, a link or a "
+                          "sequence.")
             continue
-        try:
-            record = seqio.load_sequence(answer)
-        except SequenceError as exc:
-            console.write(f"  {exc}")
-            continue
+        cds_gene = ""
+        if ncbi.looks_like_a_target(answer):
+            try:
+                record, cds_gene = fetch_from_ncbi(console, answer)
+            except ncbi.FetchError as exc:
+                console.write(f"  {exc}")
+                continue
+        else:
+            try:
+                record = seqio.load_sequence(answer)
+            except SequenceError as exc:
+                console.write(f"  {exc}")
+                continue
 
         orf = design_mod.read_orf(record.seq)
         console.write(
@@ -165,7 +222,7 @@ def ask_for_gene(console: Console) -> tuple[str, seqio.Record]:
                 "say so rather than ignore it."
             )
         console.write()
-        return answer, record
+        return answer, record, cds_gene
 
 
 def ask_for_vector(console: Console) -> str:
@@ -233,7 +290,7 @@ def build_request(console: Console) -> orchestrate.Request:
     console.write("restriction-cloning primers for expression in E. coli")
     console.write()
 
-    insert, record = ask_for_gene(console)
+    insert, record, cds_gene = ask_for_gene(console)
     insert_name = ""
     if record.name == "<literal>":
         # A pasted sequence brought no name, and the name goes on to the
@@ -251,8 +308,8 @@ def build_request(console: Console) -> orchestrate.Request:
     )
     console.write()
     return orchestrate.Request(
-        insert=insert, insert_name=insert_name, vector=vector,
-        origin=origin, verify=verify,
+        insert=insert, insert_name=insert_name, cds_gene=cds_gene,
+        vector=vector, origin=origin, verify=verify,
     )
 
 
@@ -314,7 +371,8 @@ def run(console: Console | None = None) -> int:
 
     try:
         outcome = orchestrate.run(request)
-    except (SequenceError, vectors_mod.VectorError) as exc:
+    except (SequenceError, vectors_mod.VectorError,
+            ncbi.FetchError) as exc:
         console.write(f"clonewright: {exc}")
         return 2
     except InvariantError as exc:
