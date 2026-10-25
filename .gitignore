@@ -1,0 +1,22 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+
+# Build artefacts
+build/
+dist/
+*.egg-info/
+
+# Virtual environments
+.venv/
+venv/
+
+# Editor and OS cruft
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+*.swp
+
+# Vector maps are tracked on purpose: they are plain-text GenBank built by
+# tools/build_vector_maps.py, and the test suite designs into them.

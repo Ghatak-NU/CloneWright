@@ -1,0 +1,207 @@
+# clonewright 0.1.0 -- worked example
+#
+#   python -m clonewright design examples/SOD1.fasta --vector pET-28a --origin human
+#
+# Kept in the repository on purpose: it records what the tool produced at
+# a given commit, which is the provenance trail that makes a design
+# traceable back to the code that made it.
+
+--------------------------------------------------------------------------
+  SOD1  ->  pET-28a
+--------------------------------------------------------------------------
+
+-- strategy --------------------------------------------------------------
+  cloning        restriction + ligation, directional
+  mode           nfusion
+  5' enzyme      NdeI CA^TATG (2 nt 5' overhang)   vector position 5128
+  3' enzyme      XhoI C^TCGAG (4 nt 5' overhang)   vector position 5207
+  excised        78 bp of vector
+  insert         465 bp amplified from the template
+
+-- primers ---------------------------------------------------------------
+  FWD  SOD1_F
+        5'-TGACTG CATATG ATGGCGACGAAGGCCGTGTG-3'
+        full length   32 nt
+        annealing     ATGGCGACGAAGGCCGTGTG  (20 nt)
+        Tm annealing   70.8 C   <- sets the annealing temperature
+        Tm full        76.7 C   (cycle 3 onward, once the tail is copied)
+        GC             65.0 %  (annealing region)
+        3' dG          -3.9 kcal/mol   GC clamp 3/5
+
+  REV  SOD1_R
+        5'-TGACTG CTCGAG TTATTGGGCGATCCCAATTACACCACAAGC-3'
+        full length   42 nt
+        annealing     TTATTGGGCGATCCCAATTACACCACAAGC  (30 nt)
+        Tm annealing   70.6 C   <- sets the annealing temperature
+        Tm full        77.7 C   (cycle 3 onward, once the tail is copied)
+        GC             46.7 %  (annealing region)
+        3' dG          -4.1 kcal/mol   GC clamp 3/5
+
+  Tm difference  0.2 C
+  suggested Ta   65.6 C  (lower annealing Tm minus 5)
+  gradient       62 - 70 C
+
+-- expected products -----------------------------------------------------
+  PCR amplicon         489 bp
+  after double digest  470 bp insert fragment
+  vector backbone      5291 bp
+  final construct      5761 bp
+
+  diagnostic digest of the finished construct:
+    NdeI                     5761 bp
+    XhoI                     5761 bp
+    NdeI + XhoI              5291 bp, 470 bp
+
+-- alternative enzyme pairs ----------------------------------------------
+  NheI/XhoI          excises 73 bp
+  NdeI/NotI          excises 70 bp
+  NheI/NotI          excises 65 bp
+  NdeI/HindIII       excises 63 bp
+  NheI/HindIII       excises 58 bp
+
+-- checks ----------------------------------------------------------------
+   WARN  SOD1_F: the tail contains an ATG 3 bases before the real start codon, in frame with it, so translation starting there adds 1 residue(s) to the N terminus (ATG)
+   note  cloning as nfusion: the vector carries 6xHis tag, thrombin site in frame downstream of its own start codon, which is what its ribosome binding site is positioned for
+   note  pET-28a's expression cassette runs on the reverse strand, so the vector is shown reverse-complemented here and the insert goes in the direction the promoter reads. Position p below is 5369 - p on your map
+   note  no cassette is being replaced: 6xHis tag, thrombin site are what the insert fuses behind and have to stay. The insert goes into the polylinker after them
+   note  inserting into the polylinker at 5128-5207; 11 of its sites are usable; no vector cassette is being replaced
+   note  reading frame taken from the start codon at 5071 (first ATG 6 nt after the RBS); 2 feature(s) begin a whole number of codons after it: 6xHis tag at +12, thrombin site at +39
+   note  63 bases run from the start codon to the end of the regenerated NdeI site, so no padding is needed: the site is already in frame
+   note  the product carries the vector's N-terminal 6xHis tag, which sits between the start codon and the insert
+   note  the vector's C-terminal 6xHis tag is downstream of the insert's own stop codon, so it is not translated. To use it, remove the stop with --mode cfusion; to keep the protein untagged at its C terminus, leave it as it is
+   note  the insert keeps its own ATG, which becomes an extra methionine after 6xHis tag rather than the start codon. Harmless, but it is in the product
+   note  the start codon sits 6 nt downstream of the vector's RBS at 5059-5064, inside the 5-13 nt window where initiation works best
+   note  SOD1_F: annealing Tm 70.8 C is 8.8 C above the 62 C target; the 5' end of the insert is 65% GC and no length in 18-32 nt does better. Run at the suggested Ta rather than a textbook 60 C
+   note  SOD1_R: annealing Tm 70.6 C is 8.6 C above the 62 C target; the 3' end of the insert is 47% GC and no length in 18-32 nt does better. Run at the suggested Ta rather than a textbook 60 C
+
+-- ordering --------------------------------------------------------------
+  SOD1_F	TGACTGCATATGATGGCGACGAAGGCCGTGTG
+  SOD1_R	TGACTGCTCGAGTTATTGGGCGATCCCAATTACACCACAAGC
+--------------------------------------------------------------------------
+
+-- the gene and where it came from ---------------------------------------
+  gene           SOD1, 465 bp
+  source         mammalian
+  reading frame  clean: ATG to stop, in frame, uninterrupted
+  rare codons    13 of 155 (8.4%); E. coli's own genes sit near 3.4%
+
+    codon  aa   count   per 1000 in E. coli   pRARE
+    GGA    Gly     10                 7.9   yes
+    CTA    Leu      1                 3.9   yes
+    AGA    Arg      1                 2.1   yes
+    AGG    Arg      1                 1.2   yes
+
+  strain hint    a tRNA-supplementing strain such as Rosetta is worth using
+
+   WARN  E. coli cannot splice, and nearly every mammalian gene has
+         introns, so genomic DNA is almost never the right template. This
+         sequence does read as a clean ORF, which is what a cDNA looks like
+         -- but it is also what a single-exon gene looks like, so confirm
+         the template is cDNA or a synthetic construct rather than genomic
+         DNA
+   WARN  13 of 155 codons (8.4%, against about 3.4% in an average E. coli
+         gene) are ones E. coli keeps little tRNA for: GGA (Gly) x10, CTA
+         (Leu) x1, AGA (Arg) x1, AGG (Arg) x1. That is a high enough load
+         to cost yield and risk truncation; a strain supplying the missing
+         tRNAs, such as Rosetta, is the cheaper fix than resynthesising the
+         gene
+   note  codon frequencies are transcribed from published E. coli K-12
+         usage tables, not derived from your sequences
+
+-- expression in E. coli -------------------------------------------------
+  vector         pET-28a(+)
+  promoter       T7/lac
+  induction      0.1-1 mM IPTG at OD600 0.5-0.8
+  selection      kanamycin
+  purification   Ni-NTA on the N-terminal 6xHis; thrombin removes the tag
+  cloning host   DH5-alpha (recA-, endA-)
+  expression     Rosetta(DE3) (T7 RNAP (DE3), lon-/ompT-, rare tRNAs)
+  plates need    kanamycin, chloramphenicol
+
+  the protein this construct encodes:
+    length       175 residues
+    mass         18.2 kDa
+    A280         0.33 for 1 mg/mL, 1 cm (e = 6000 M-1 cm-1)
+    N terminus   MGSSHHHHHHSSGLVPRGSHM
+                 (21 residues from the vector, ahead of your sequence)
+    C terminus   nothing added
+    stops at     TAA
+
+  full sequence, N to C:
+        1  MGSSHHHHHHSSGLVPRGSHMMATKAVCVLKGDGPVQGIINFEQKESNGPVKVWGSIKGL
+       61  TEGLHGFHVHEFGDNTAGCTSAGPHFNPLSRKHGGPKDEERHVGDLGNVTADKDGVADVS
+      121  IEDSVISLSGDHCIIGRTLVVHEKADDLGKGGNEESTKTGNAGSRLACGVIGIAQ
+
+   WARN  E. coli cannot splice, and nearly every mammalian gene has introns, so genomic DNA is almost never the right template. This sequence does read as a clean ORF, which is what a cDNA looks like -- but it is also what a single-exon gene looks like, so confirm the template is cDNA or a synthetic construct rather than genomic DNA
+   WARN  13 of 155 codons (8.4%, against about 3.4% in an average E. coli gene) are ones E. coli keeps little tRNA for: GGA (Gly) x10, CTA (Leu) x1, AGA (Arg) x1, AGG (Arg) x1. That is a high enough load to cost yield and risk truncation; a strain supplying the missing tRNAs, such as Rosetta, is the cheaper fix than resynthesising the gene
+   WARN  Rosetta(DE3) carries a resident plasmid selected with chloramphenicol, so plates and cultures need both that and the vector's own antibiotic. Selecting for only one lets the strain drop the other
+   note  codon frequencies are transcribed from published E. coli K-12 usage tables, not derived from your sequences
+   note  DH5-alpha: the default cloning and storage host: recA1 endA1, so the plasmid stays intact and minipreps are clean
+   note  T7 promoter and Rosetta(DE3) carries T7 RNA polymerase, from a lambda-DE3 lysogen, so transcription of the insert is induced rather than constitutive
+   note  Rosetta(DE3): carries pRARE, supplying tRNAs for codons E. coli uses rarely; for genes from organisms with a different codon bias
+   note  transform Rosetta(DE3) fresh from the verified DH5-alpha stock each time, rather than keeping a working stock of it. An expression strain is where the construct is used, not where it lives
+
+-- colony PCR screen -----------------------------------------------------
+  polymerase     Taq
+
+  5' junction
+    asks         is the insert joined to the vector at its 5' end, the right way round?
+    primers      colVecF (3' end 5062) x colInsR (3' end 5543)
+    clone        516 bp
+    parental     no product  <- a band can only come from a real clone
+     note  the parental vector gives no product, so a band means the insert is joined to the vector and not merely present in the colony
+
+  3' junction
+    asks         is the insert joined to the vector at its 3' end?
+    primers      colInsF (3' end 5502) x colVecR (3' end 264)
+    clone        563 bp
+    parental     no product  <- a band can only come from a real clone
+     note  the parental vector gives no product, so a band means the insert is joined to the vector and not merely present in the colony
+
+  flanking
+    asks         empty or full, by size, in one reaction
+    primers      colVecF (3' end 5062) x colVecR (3' end 264)
+    clone        999 bp
+    parental     607 bp
+     note  uncut or religated parental vector gives 607 bp, which is the band a negative colony shows
+
+  primers to order:
+    colVecF    5'-TGATGTCGGCGATATAGG-3'   18 nt  Tm 57.5
+    colInsR    5'-TCACATTGCCCAAGTCTC-3'   18 nt  Tm 58.8
+    colInsF    5'-TCCTCACTTTAATCCTCTATCC-3'   22 nt  Tm 57.6
+    colVecR    5'-GAAGGGAAGAAAGCGAAAG-3'   19 nt  Tm 57.8
+
+   WARN  colony PCR shows that a junction exists, not that the sequence is right. It cannot see a point mutation introduced by the cloning PCR, so a positive colony still has to be sequenced
+   note  each junction pair has one primer in the vector backbone and one in the insert. A pair with both primers inside the insert would amplify leftover template and PCR product carried through the ligation just as well as a real recombinant, so every colony would score positive
+   note  a junction pair also reports orientation: an insert ligated backwards gives no product at all, whereas a flanking vector pair gives the same size either way
+   note  Taq is the usual choice here: fidelity does not matter for a screen, and tolerance of crude lysate does. Lyse the colony first, or the early cycles go on releasing template
+
+-- sequencing the construct ----------------------------------------------
+  construct      5761 bp, circular
+  to verify      5232-60   (470 bp insert plus 60 bp either side, so the reads
+                 carry into vector sequence and the junctions are actually read)
+  read model     bases 1-50 after the primer discarded, usable to 700,
+                 consecutive reads overlapping by 100 bp
+  reads          5  (3 primer(s) to order, 2 on universal primers)
+
+  forward reads, in the order they walk the construct:
+    T7         --> 3' end   5165  20 nt  Tm 53.7  reads   5216-104     [T7]
+    seqF1      --> 3' end   5683  18 nt  Tm 57.4  reads   5734-622   
+
+  reverse reads, in the order they walk the construct:
+    seqR1      <-- 3' end    138  22 nt  Tm 59.1  reads   5199-87    
+    T7term     <-- 3' end     76  19 nt  Tm 60.3  reads   5137-25      [T7term]
+    seqR2      <-- 3' end   5361  20 nt  Tm 57.6  reads   4661-5310  
+
+  coverage       contiguous across the whole region, both strands
+
+  primers to order:
+    seqF1      5'-CAGATGACTTGGGCAAAG-3'   18 nt  Tm 57.4
+    seqR1      5'-CGGATATAGTTCCTCCTTTCAG-3'   22 nt  Tm 59.1
+    seqR2      5'-GTCCATTACTTTCCTTCTGC-3'   20 nt  Tm 57.6
+
+   note  both strands are covered: 2 forward and 3 reverse reads. A routine subclone is often passed on single-pass coverage, which halves the cost; read both strands for anything you will build on, because one trace cannot distinguish a real variant from a sequencing artefact
+   note  2 read(s) use a universal primer the facility already stocks: T7, T7term
+   note  primers sit at least 50 bases back from what they read, because the bases just after a primer are not called reliably; a primer placed on a junction reads everything except the junction
+
+The design succeeded, with warnings. Read them before ordering: a design that returns a warning has not simply succeeded, and every one above is something a bench step will or will not forgive.

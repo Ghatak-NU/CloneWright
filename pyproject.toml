@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "clonewright"
+version = "0.1.0"
+description = "Restriction-cloning primers for E. coli expression, checked against the vector and the insert rather than assumed"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+license-files = ["LICENSE"]
+keywords = [
+    "molecular-biology",
+    "cloning",
+    "primer-design",
+    "restriction-enzymes",
+    "protein-expression",
+    "e-coli",
+    "bioinformatics",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+]
+# None. The whole package is the standard library, which is the point:
+# a primer designer that needs a conda environment does not get used.
+dependencies = []
+
+[project.optional-dependencies]
+# Only for `clonewright ask --model`, which lets Claude read the request
+# out of a sentence. Everything else, including `ask` without --model,
+# runs without it.
+agent = ["anthropic>=0.40"]
+
+[project.scripts]
+clonewright = "clonewright.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/Ghatak-NU/clonewright"
+Issues = "https://github.com/Ghatak-NU/clonewright/issues"
+
+[tool.setuptools]
+packages = ["clonewright"]
+
+[tool.setuptools.package-data]
+clonewright = ["data/vectors/*.gb"]
